@@ -1,0 +1,137 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 36 33% 94%;
+    --foreground: 20 10% 16%;
+
+    --card: 36 30% 90%;
+    --card-foreground: 20 10% 16%;
+
+    --popover: 36 33% 94%;
+    --popover-foreground: 20 10% 16%;
+
+    --primary: 20 64% 47%;
+    --primary-foreground: 36 33% 96%;
+
+    --secondary: 30 25% 40%;
+    --secondary-foreground: 36 33% 96%;
+
+    --muted: 30 12% 58%;
+    --muted-foreground: 30 12% 58%;
+
+    --accent: 36 30% 90%;
+    --accent-foreground: 20 10% 16%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 30 15% 78%;
+    --input: 30 15% 78%;
+    --ring: 20 64% 47%;
+
+    --radius: 0.25rem;
+
+    --color-dark: 24 12% 9%;
+    --color-surface: 36 30% 90%;
+
+    --sidebar-background: 36 33% 94%;
+    --sidebar-foreground: 20 10% 16%;
+    --sidebar-primary: 20 64% 47%;
+    --sidebar-primary-foreground: 36 33% 96%;
+    --sidebar-accent: 36 30% 90%;
+    --sidebar-accent-foreground: 20 10% 16%;
+    --sidebar-border: 30 15% 78%;
+    --sidebar-ring: 20 64% 47%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-display;
+  }
+}
+
+@layer components {
+  .section-label {
+    @apply font-mono text-xs uppercase tracking-[0.25em] text-muted-foreground flex items-center gap-3;
+  }
+  .section-label::before {
+    content: "";
+    @apply block w-8 h-px bg-primary;
+  }
+
+  .btn-primary {
+    @apply relative overflow-hidden bg-primary text-primary-foreground px-8 py-4 font-body font-medium text-sm tracking-wide uppercase transition-all duration-300;
+  }
+  .btn-primary::before {
+    content: "";
+    @apply absolute inset-0 bg-foreground transform -translate-x-full transition-transform duration-500 ease-out;
+  }
+  .btn-primary:hover::before {
+    @apply translate-x-0;
+  }
+  .btn-primary span {
+    @apply relative z-10;
+  }
+
+  .btn-ghost {
+    @apply relative border border-foreground/30 px-8 py-4 font-body font-medium text-sm tracking-wide uppercase text-foreground transition-all duration-300 hover:border-primary hover:text-primary;
+  }
+
+  .grain-overlay {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  }
+
+  .warm-overlay {
+    @apply absolute inset-0;
+    background: linear-gradient(to bottom, hsl(20 64% 47% / 0.08), hsl(36 33% 94% / 0.05));
+  }
+}
+
+/* Custom cursor */
+.custom-cursor {
+  @apply fixed w-3 h-3 rounded-full bg-primary pointer-events-none z-[9999] transition-transform duration-200 ease-out;
+  mix-blend-mode: difference;
+}
+.custom-cursor.expanded {
+  @apply w-10 h-10 bg-primary/40;
+}
+
+/* Scroll progress */
+.scroll-progress {
+  @apply fixed top-0 left-0 h-[2px] bg-primary z-[9998];
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: hsl(36 33% 94%);
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(20 64% 47% / 0.3);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(20 64% 47% / 0.6);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
