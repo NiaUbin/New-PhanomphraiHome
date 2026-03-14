@@ -5,15 +5,35 @@ import ScrollReveal from './ScrollReveal';
 import { Phone, Mail, Clock, MapPin } from 'lucide-react';
 import Link from 'next/link';
 
+import { contactService } from '@/utils/portfolioService';
+import { toast } from 'sonner';
+
 const projectTypes = ['เลือกประเภทงาน', 'ก่อสร้างบ้านใหม่', 'ต่อเติม/ปรับปรุง', 'รีโนเวท', 'ตกแต่งภายใน', 'งานระบบ', 'ที่ปรึกษา'];
 const budgets = ['เลือกงบประมาณโดยประมาณ', 'ต่ำกว่า 500,000 บาท', '500,000 - 1,000,000 บาท', '1,000,000 - 3,000,000 บาท', '3,000,000 - 5,000,000 บาท', '5,000,000 - 10,000,000 บาท', 'มากกว่า 10,000,000 บาท'];
 
 const ContactSection = () => {
   const [formData, setFormData] = useState({ name: '', phone: '', email: '', type: '', budget: '', details: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert('ขอบคุณที่ติดต่อเรา! เราจะติดต่อกลับภายใน 24 ชั่วโมง');
+    
+    if (!formData.name || !formData.phone) {
+      toast.error('กรุณากรอกชื่อและเบอร์โทรศัพท์');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      await contactService.create(formData);
+      toast.success('ขอบคุณที่ติดต่อเรา! เราจะติดต่อกลับภายใน 24 ชั่วโมง');
+      setFormData({ name: '', phone: '', email: '', type: '', budget: '', details: '' });
+    } catch (error) {
+      console.error(error);
+      toast.error('เกิดข้อผิดพลาดในการส่งข้อมูล');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -86,8 +106,15 @@ const ContactSection = () => {
                 onChange={(e) => setFormData({ ...formData, details: e.target.value })}
                 className="w-full bg-card border border-border px-4 py-3.5 font-body text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors resize-none"
               />
-              <button type="submit" className="btn-primary w-full sm:w-auto">
-                <span>ส่งข้อมูล</span>
+              <button type="submit" disabled={isSubmitting} className="btn-primary w-full sm:w-auto flex items-center justify-center gap-2">
+                {isSubmitting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>กำลังส่ง...</span>
+                  </>
+                ) : (
+                  <span>ส่งข้อมูล</span>
+                )}
               </button>
             </form>
           </ScrollReveal>
@@ -96,9 +123,9 @@ const ContactSection = () => {
           <ScrollReveal delay={200}>
             <div className="space-y-8">
               {[
-                { icon: Phone, label: 'โทรศัพท์', value: '02-XXX-XXXX / 08X-XXX-XXXX' },
-                { icon: Mail, label: 'อีเมล', value: 'info@formabuild.co.th' },
-                { icon: MapPin, label: 'LINE ID', value: '@formabuild' },
+                { icon: Phone, label: 'โทรศัพท์', value: '092-262-0227' },
+                { icon: Mail, label: 'อีเมล', value: 'เอามาใส่ตรงนี้ อย่าลืม' },
+                { icon: MapPin, label: 'LINE ID', value: 'เอามาใส่ตรงนี้ อย่าลืม' },
                 { icon: Clock, label: 'เวลาทำการ', value: 'จันทร์ - เสาร์ 08:00 - 18:00' },
               ].map((info, i) => {
                 const Icon = info.icon;
@@ -116,12 +143,12 @@ const ContactSection = () => {
               })}
 
               {/* Map placeholder */}
-              <div className="w-full h-64 bg-card border border-border flex items-center justify-center">
+              {/* <div className="w-full h-64 bg-card border border-border flex items-center justify-center">
                 <div className="text-center">
                   <MapPin className="w-8 h-8 text-muted-foreground mx-auto mb-2" strokeWidth={1.5} />
                   <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">แผนที่สำนักงาน</p>
                 </div>
-              </div>
+              </div> */}
             </div>
           </ScrollReveal>
         </div>

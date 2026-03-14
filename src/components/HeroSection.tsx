@@ -6,7 +6,7 @@ import CountUp from './CountUp';
 const HeroSection = () => {
   const [loaded, setLoaded] = useState(false);
   const heroBg =
-    'https://images.unsplash.com/photo-1497366412874-3415097a27e7?q=80&w=1169&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+    'https://solarassetmanagementeu.com/wp-content/uploads/2023/08/construction-residential-new-house-progress-building-site-1.jpg';
 
   useEffect(() => {
     const timer = setTimeout(() => setLoaded(true), 100);

@@ -106,9 +106,62 @@ export const categoryService = {
     return data[0] as Category
   },
 
+  async update(id: string, name: string) {
+    const { data, error } = await supabase
+      .from('categories')
+      .update({ name })
+      .eq('id', id)
+      .select()
+    
+    if (error) throw error
+    return data[0] as Category
+  },
+
   async delete(id: string) {
     const { error } = await supabase
       .from('categories')
+      .delete()
+      .eq('id', id)
+    
+    if (error) throw error
+  }
+}
+
+export interface Contact {
+  id?: string
+  name: string
+  phone: string
+  email: string
+  type: string
+  budget: string
+  details: string
+  created_at?: string
+}
+
+export const contactService = {
+  async getAll() {
+    const { data, error } = await supabase
+      .from('contacts')
+      .select('*')
+      .order('created_at', { ascending: false })
+    
+    if (error) throw error
+    return data as Contact[]
+  },
+
+  async create(contact: Contact) {
+    const { data, error } = await supabase
+      .from('contacts')
+      .insert([contact])
+      .select()
+    
+    if (error) throw error
+    return data[0] as Contact
+  },
+
+  async delete(id: string) {
+    const { error } = await supabase
+      .from('contacts')
       .delete()
       .eq('id', id)
     

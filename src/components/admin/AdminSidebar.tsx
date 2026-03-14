@@ -1,9 +1,9 @@
 "use client"
 
 import * as React from "react"
-import { LayoutDashboard, Image, Settings, Home, LogOut } from "lucide-react"
+import { LayoutDashboard, Image, Settings, Home, LogOut, MessageSquare } from "lucide-react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 
 import {
   Sidebar,
@@ -18,6 +18,8 @@ import {
   SidebarGroupContent,
 } from "@/components/ui/sidebar"
 
+import { supabase } from "@/utils/supabase"
+
 const items = [
   {
     title: "จัดการผลงาน",
@@ -30,14 +32,27 @@ const items = [
     icon: LayoutDashboard,
   },
   {
-    title: "กลับสู่หน้าหลัก",
-    url: "/",
-    icon: Home,
+    title: "จัดการการติดต่อ",
+    url: "/admin/contacts",
+    icon: MessageSquare,
   },
 ]
 
 export function AdminSidebar() {
   const pathname = usePathname()
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      // ใช้ window.location.href เพื่อล้าง state ทั้งหมดและกลับไปหน้า login ทันที
+      window.location.href = "/admin/login";
+    } catch (error) {
+      console.error("Error signing out:", error);
+      // ถ้า error ก็ให้ force ไปหน้า login อยู่ดี
+      window.location.href = "/admin/login";
+    }
+  }
 
   return (
     <Sidebar collapsible="icon">
@@ -74,9 +89,9 @@ export function AdminSidebar() {
       <SidebarFooter className="border-t p-4">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton>
+            <SidebarMenuButton onClick={handleLogout} className="text-destructive hover:text-destructive/90 transition-colors">
               <LogOut />
-              <span>Sign Out</span>
+              <span className="group-data-[collapsible=icon]:hidden">ออกจากระบบ</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -84,3 +99,4 @@ export function AdminSidebar() {
     </Sidebar>
   )
 }
+

@@ -279,11 +279,17 @@ const ProjectDetailClient = ({ id, initialProject, relatedProjects }: ProjectDet
                       fill
                       className="object-cover transition-transform duration-700 group-hover:scale-110" 
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
-                    <div className="absolute inset-0 flex flex-col justify-end p-6">
-                      <div className="translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                        <span className="font-mono text-[10px] uppercase tracking-widest text-primary mb-2 block">{p.tag}</span>
-                        <h3 className="font-display text-xl font-bold text-foreground">{p.title}</h3>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-70 group-hover:opacity-90 transition-all duration-500" />
+                    <div className="absolute inset-0 flex flex-col justify-end p-8">
+                      <div className="translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="w-4 h-px bg-primary" />
+                          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary font-bold">{p.category || p.tag || 'โครงการ'}</span>
+                        </div>
+                        <h3 className="font-display text-2xl font-bold text-white mb-2 leading-tight drop-shadow-sm transition-colors group-hover:text-primary-foreground/90">{p.title}</h3>
+                        <div className="flex items-center gap-2 text-white/50 font-mono text-[10px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">
+                          ดูโครงการ <span className="text-primary">→</span>
+                        </div>
                       </div>
                     </div>
                   </Link>

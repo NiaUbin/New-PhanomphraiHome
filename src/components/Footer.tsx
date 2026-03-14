@@ -11,7 +11,7 @@ const Footer = () => {
           {/* Logo */}
           <div>
             <h3 className="font-display text-2xl font-bold tracking-wider mb-4">
-              PHANOM<span className="text-primary">PHRAI</span>
+              PHANOM<span className="text-primary">PHRAI PK</span>
             </h3>
             <p className="font-body text-sm text-primary-foreground/50 leading-relaxed">
               รับเหมาก่อสร้างและออกแบบสถาปัตยกรรมระดับพรีเมียม

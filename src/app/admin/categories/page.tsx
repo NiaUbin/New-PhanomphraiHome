@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Plus, Trash2, Loader2 } from "lucide-react"
+import { Plus, Trash2, Loader2, Edit2, Check, X } from "lucide-react"
 import { categoryService, Category } from "@/utils/portfolioService"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -20,6 +20,11 @@ export default function CategoryAdminPage() {
   const [loading, setLoading] = useState(true)
   const [newCategory, setNewCategory] = useState("")
   const [isAdding, setIsAdding] = useState(false)
+  
+  // States for editing
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editValue, setEditValue] = useState("")
+  const [isUpdating, setIsUpdating] = useState(false)
 
   const fetchCategories = async () => {
     try {
@@ -48,23 +53,50 @@ export default function CategoryAdminPage() {
 
     try {
       setIsAdding(true)
-      console.log("Adding category:", newCategory.trim()) // Add log for debugging
-      const result = await categoryService.create(newCategory.trim())
-      console.log("Category added:", result)
+      await categoryService.create(newCategory.trim())
       toast.success("เพิ่มหมวดหมู่สำเร็จ")
       setNewCategory("")
       fetchCategories()
     } catch (error) {
       console.error("Create error:", error)
-      const errorMessage = error instanceof Error ? error.message : "ไม่ทราบสาเหตุ"
-      toast.error(`เกิดข้อผิดพลาด: ${errorMessage}`)
+      toast.error("เกิดข้อผิดพลาดในการสร้างโหมดหมู่")
     } finally {
       setIsAdding(false)
     }
   }
 
+  const handleStartEdit = (category: Category) => {
+    setEditingId(category.id)
+    setEditValue(category.name)
+  }
+
+  const handleCancelEdit = () => {
+    setEditingId(null)
+    setEditValue("")
+  }
+
+  const handleUpdate = async (id: string) => {
+    if (!editValue.trim()) {
+      toast.error("กรุณากรอกชื่อหมวดหมู่")
+      return
+    }
+
+    try {
+      setIsUpdating(true)
+      await categoryService.update(id, editValue.trim())
+      toast.success("แก้ไขหมวดหมู่สำเร็จ")
+      setEditingId(null)
+      fetchCategories()
+    } catch (error) {
+      console.error(error)
+      toast.error("เกิดข้อผิดพลาดในการแก้ไข")
+    } finally {
+      setIsUpdating(false)
+    }
+  }
+
   const handleDelete = async (id: string) => {
-    if (!confirm("คุณรแน่ใจหรือไม่ที่จะลบหมวดหมู่นี้?")) return
+    if (!confirm("คุณแน่ใจหรือไม่ที่จะลบหมวดหมู่นี้?")) return
     
     try {
       await categoryService.delete(id)
@@ -102,7 +134,7 @@ export default function CategoryAdminPage() {
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50">
-              <TableHead>ลำดับ</TableHead>
+              <TableHead className="w-20">ลำดับ</TableHead>
               <TableHead>ชื่อหมวดหมู่</TableHead>
               <TableHead className="text-right">จัดการ</TableHead>
             </TableRow>
@@ -124,17 +156,57 @@ export default function CategoryAdminPage() {
               categories.map((category, index) => (
                 <TableRow key={category.id}>
                   <TableCell className="text-muted-foreground">{index + 1}</TableCell>
-                  <TableCell className="font-medium text-lg">{category.name}</TableCell>
+                  <TableCell>
+                    {editingId === category.id ? (
+                      <div className="flex items-center gap-2">
+                        <Input 
+                          value={editValue}
+                          onChange={(e) => setEditValue(e.target.value)}
+                          className="h-9 min-w-[200px]"
+                          autoFocus
+                        />
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          className="text-primary hover:bg-primary/10"
+                          onClick={() => handleUpdate(category.id)}
+                          disabled={isUpdating}
+                        >
+                          {isUpdating ? <Loader2 className="size-4 animate-spin" /> : "บันทึก"}
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          onClick={handleCancelEdit}
+                        >
+                          ยกเลิก
+                        </Button>
+                      </div>
+                    ) : (
+                      <span className="font-medium text-lg">{category.name}</span>
+                    )}
+                  </TableCell>
                   <TableCell className="text-right">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="text-destructive hover:text-destructive hover:bg-destructive/10" 
-                      onClick={() => handleDelete(category.id)}
-                    >
-                      <Trash2 className="size-4 mr-2" />
-                      ลบ
-                    </Button>
+                    <div className="flex justify-end gap-2">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        className="text-muted-foreground hover:text-primary"
+                        onClick={() => handleStartEdit(category)}
+                      >
+                        <Edit2 className="size-4 mr-2" />
+                        แก้ไข
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10" 
+                        onClick={() => handleDelete(category.id)}
+                      >
+                        <Trash2 className="size-4 mr-2" />
+                        ลบ
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
@@ -145,3 +217,5 @@ export default function CategoryAdminPage() {
     </div>
   )
 }
+
+
