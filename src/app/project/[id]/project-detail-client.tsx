@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { projects } from "@/data/projects";
 import { motion } from "framer-motion";
-import { ArrowLeft, MapPin, Calendar, Ruler, Clock } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, Ruler, Clock, Bed, Bath } from "lucide-react";
 import ScrollReveal from "@/components/ScrollReveal";
 import Lightbox from "@/components/Lightbox";
 import { Project as SupabaseProject } from "@/utils/portfolioService";
@@ -13,9 +13,10 @@ import { Project as SupabaseProject } from "@/utils/portfolioService";
 interface ProjectDetailClientProps {
   id: string;
   initialProject?: SupabaseProject | null;
+  relatedProjects?: SupabaseProject[];
 }
 
-const ProjectDetailClient = ({ id, initialProject }: ProjectDetailClientProps) => {
+const ProjectDetailClient = ({ id, initialProject, relatedProjects }: ProjectDetailClientProps) => {
   // Use initialProject if provided (from Supabase), otherwise fall back to static data
   const staticProject = projects.find((p) => p.id === id);
   const project = initialProject || staticProject;
@@ -41,11 +42,7 @@ const ProjectDetailClient = ({ id, initialProject }: ProjectDetailClientProps) =
     );
   }
 
-  const related = projects.filter((p) => {
-    const isSameCategory = p.category === project.category;
-    const isDifferentProject = String(p.id) !== String(id);
-    return isSameCategory && isDifferentProject;
-  }).slice(0, 3);
+  const related = relatedProjects || [];
   
   // Ensure gallery images are valid non-empty strings
   const gallery = (project.gallery || []).filter(img => typeof img === 'string' && img.trim() !== "");
@@ -68,7 +65,7 @@ const ProjectDetailClient = ({ id, initialProject }: ProjectDetailClientProps) =
       <div className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 flex items-center justify-between h-20">
           <Link href="/" className="font-display text-2xl font-bold tracking-wider text-foreground">
-            FORMA <span className="text-primary">BUILD</span>
+            PHANOMPHRAI <span className="text-primary">PK</span>
           </Link>
           <Link
             href="/#portfolio"
@@ -95,35 +92,41 @@ const ProjectDetailClient = ({ id, initialProject }: ProjectDetailClientProps) =
           className="object-cover"
           priority
         />
-        <div className="warm-overlay absolute inset-0 bg-black/10" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
+        <div className="absolute inset-0 bg-black/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-transparent hidden lg:block" />
 
-        <div className="absolute bottom-0 left-0 right-0 p-6 lg:p-16">
+        <div className="absolute bottom-0 left-0 right-0 p-8 lg:p-20">
           <div className="max-w-7xl mx-auto">
-            <motion.span 
-              initial={{ opacity: 0, y: 20 }} 
-              animate={{ opacity: 1, y: 0 }} 
-              transition={{ delay: 0.3 }} 
-              className="font-mono text-xs uppercase tracking-widest text-primary mb-3 block"
+            <motion.div
+              initial={{ opacity: 0, x: -20 }} 
+              animate={{ opacity: 1, x: 0 }} 
+              transition={{ delay: 0.3 }}
+              className="inline-flex items-center gap-2 mb-4"
             >
-              {project.tag}
-            </motion.span>
+              <span className="w-8 h-px bg-primary" />
+              <span className="font-mono text-xs uppercase tracking-[0.3em] text-primary/90 font-bold">
+                {project.tag || 'บ้านใหม่'}
+              </span>
+            </motion.div>
+            
             <motion.h1 
               initial={{ opacity: 0, y: 30 }} 
               animate={{ opacity: 1, y: 0 }} 
               transition={{ delay: 0.4 }} 
-              className="font-display text-4xl md:text-6xl lg:text-7xl font-bold mb-2 text-foreground"
+              className="font-display text-4xl md:text-6xl lg:text-7xl font-bold mb-6 text-white leading-tight tracking-tight drop-shadow-2xl"
             >
               {project.title}
             </motion.h1>
+
             <motion.div 
               initial={{ opacity: 0, y: 20 }} 
               animate={{ opacity: 1, y: 0 }} 
               transition={{ delay: 0.5 }} 
-              className="flex items-center gap-2 text-muted-foreground font-body"
+              className="flex items-center gap-3 text-white/90 font-body bg-black/20 backdrop-blur-md w-fit px-4 py-2 rounded-sm border border-white/10"
             >
-              <MapPin className="w-4 h-4 text-primary" />
-              {project.location}
+              <MapPin className="w-5 h-5 text-primary" />
+              <span className="text-lg font-medium tracking-wide">{project.location || 'กรุงเทพฯ'}</span>
             </motion.div>
           </div>
         </div>
@@ -131,23 +134,45 @@ const ProjectDetailClient = ({ id, initialProject }: ProjectDetailClientProps) =
 
       {/* Info bar */}
       <div className="border-y border-border bg-card">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8 grid grid-cols-2 md:grid-cols-4 gap-8">
-          {[
-            { Icon: Calendar, label: 'ปีที่แล้วเสร็จ', value: project.year || '2024' },
-            { Icon: Ruler, label: 'พื้นที่', value: project.area },
-            { Icon: Clock, label: 'ระยะเวลา', value: project.duration || '8 เดือน' },
-            { Icon: MapPin, label: 'สถานที่', value: project.location },
-          ].map((item) => (
-            <div key={item.label} className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-primary/10 flex items-center justify-center rounded-sm">
-                <item.Icon className="w-5 h-5 text-primary" />
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8 md:py-12">
+          {/* Main Stats Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {[
+              { Icon: Calendar, label: 'ปีที่แล้วเสร็จ', value: project.year || '2024' },
+              { Icon: Ruler, label: 'พื้นที่', value: project.area },
+              { Icon: Clock, label: 'ระยะเวลา', value: project.duration || '8 เดือน' },
+              { Icon: MapPin, label: 'สถานที่', value: project.location || 'กรุงเทพฯ' },
+            ].map((item) => (
+              <div key={item.label} className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-primary/10 flex items-center justify-center rounded-sm">
+                  <item.Icon className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-1">{item.label}</p>
+                  <p className="font-body text-sm font-semibold text-foreground">{item.value}</p>
+                </div>
               </div>
-              <div>
-                <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-1">{item.label}</p>
-                <p className="font-body text-sm font-semibold text-foreground">{item.value}</p>
+            ))}
+          </div>
+
+          {/* Highlighted Bedrooms/Bathrooms - Centered with same style as others */}
+          <div className="flex flex-wrap justify-center gap-x-16 gap-y-8 mt-10 pt-10 border-t border-border/40 relative">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+            {[
+              { Icon: Bed, label: 'ห้องนอน', value: project.bedroom || '3' },
+              { Icon: Bath, label: 'ห้องน้ำ', value: project.bathroom || '2' },
+            ].map((item) => (
+              <div key={item.label} className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-primary/10 flex items-center justify-center rounded-sm">
+                  <item.Icon className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-1">{item.label}</p>
+                  <p className="font-body text-sm font-semibold text-foreground">{item.value}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
 
@@ -190,53 +215,60 @@ const ProjectDetailClient = ({ id, initialProject }: ProjectDetailClientProps) =
         </div>
       )}
 
-      {/* Content */}
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16 lg:py-24 border-t border-border/50">
-        <div className="grid lg:grid-cols-3 gap-16">
+      {/* Content Section */}
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-20 lg:py-28 border-t border-border/40 bg-gradient-to-b from-transparent to-card/20">
+        <div className="grid lg:grid-cols-3 gap-20">
           <ScrollReveal className="lg:col-span-2">
-            <span className="section-label mb-4 block text-primary font-mono text-xs uppercase tracking-widest">
-              รายละเอียดโครงการ
-            </span>
-            <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-8">
-              เกี่ยวกับ<span className="text-primary">โครงการนี้</span>
+            <div className="inline-flex items-center gap-3 mb-6 bg-primary/10 px-4 py-1 rounded-full border border-primary/20">
+              <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+              <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary font-bold">
+                Project Detail
+              </span>
+            </div>
+            <h2 className="font-display text-4xl lg:text-5xl font-bold text-foreground mb-10 leading-tight">
+              รายละเอียด<span className="text-primary italic">ของผลงาน</span>
             </h2>
             <div className="prose prose-invert max-w-none">
-              <p className="font-body text-foreground/70 leading-relaxed text-xl mb-6">
+              <p className="font-body text-foreground/80 leading-relaxed text-xl mb-6 font-light">
                 {project.description}
               </p>
             </div>
           </ScrollReveal>
 
           <ScrollReveal delay={200}>
-            <span className="section-label mb-4 block text-primary font-mono text-xs uppercase tracking-widest">
-              จุดเด่น
-            </span>
-            <div className="space-y-6 mt-8">
-              {highlights.map((item, i) => (
-                <div key={i} className="flex items-start gap-4 group">
-                  <span className="flex-shrink-0 w-8 h-8 border border-primary/30 flex items-center justify-center font-mono text-xs text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
-                    {String(i + 1).padStart(2, '0')}
-                  </span>
-                  <span className="font-body text-foreground/80 pt-1">{item}</span>
-                </div>
-              ))}
+            <div className="bg-card/50 backdrop-blur-sm border border-border/40 p-8 rounded-sm relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 blur-3xl -translate-y-1/2 translate-x-1/2" />
+              <span className="font-display text-xl font-bold text-foreground mb-8 block border-b border-border/40 pb-4">
+                จุดบันทึก<span className="text-primary">สำคัญ</span>
+              </span>
+              <div className="space-y-6">
+                {highlights.map((item, i) => (
+                  <div key={i} className="flex items-start gap-4 group/item">
+                    <span className="flex-shrink-0 w-8 h-8 rounded-sm border border-primary/20 flex items-center justify-center font-mono text-xs text-primary group-hover/item:bg-primary group-hover/item:text-white transition-all duration-300">
+                      {(i + 1).toString().padStart(2, '0')}
+                    </span>
+                    <span className="font-body text-foreground/70 group-hover/item:text-foreground transition-colors pt-1 leading-snug font-medium">{item}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </ScrollReveal>
         </div>
       </div>
 
       {/* Related projects */}
-      {related.length > 0 && (
-        <div className="border-t border-border bg-card/30">
-          <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16 lg:py-24">
-            <ScrollReveal>
-              <span className="section-label mb-4 block text-primary font-mono text-xs uppercase tracking-widest">
-                ผลงานที่เกี่ยวข้อง
-              </span>
-              <h2 className="font-display text-3xl font-bold text-foreground mb-12">
-                โครงการ<span className="text-primary">อื่นๆ</span>
-              </h2>
-            </ScrollReveal>
+      <div className="border-t border-border bg-card/30">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16 lg:py-24">
+          <ScrollReveal>
+            <span className="section-label mb-4 block text-primary font-mono text-xs uppercase tracking-widest">
+              ผลงานที่เกี่ยวข้อง
+            </span>
+            <h2 className="font-display text-3xl font-bold text-foreground mb-12">
+              โครงการ<span className="text-primary">อื่นๆ</span>
+            </h2>
+          </ScrollReveal>
+
+          {related.length > 0 ? (
             <div className="grid md:grid-cols-3 gap-6">
               {related.map((p, i) => (
                 <ScrollReveal key={p.id} delay={i * 100}>
@@ -258,9 +290,27 @@ const ProjectDetailClient = ({ id, initialProject }: ProjectDetailClientProps) =
                 </ScrollReveal>
               ))}
             </div>
-          </div>
+          ) : (
+            <ScrollReveal>
+              <div className="py-20 text-center border border-dashed border-primary/20 rounded-sm bg-background/40 backdrop-blur-md relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-50" />
+                <div className="relative z-10">
+                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-primary/20 group-hover:scale-110 transition-transform duration-500">
+                    <Ruler className="w-7 h-7 text-primary/40" />
+                  </div>
+                  <h3 className="font-display text-xl font-semibold text-foreground/80 mb-2">ยังไม่มีผลงานที่เกี่ยวข้อง</h3>
+                  <p className="font-body text-muted-foreground/60 max-w-md mx-auto px-6">
+                    เรากำลังวางแผนและสร้างสรรค์ผลงานใหม่ในหมวดหมู่นี้อย่างต่อเนื่อง โปรดติดตามเร็วๆ นี้
+                  </p>
+                  <div className="mt-8">
+                    <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary/40">Phanomphrai Home Portfolio</span>
+                  </div>
+                </div>
+              </div>
+            </ScrollReveal>
+          )}
         </div>
-      )}
+      </div>
 
       {/* CTA */}
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-24 text-center">

@@ -46,14 +46,18 @@ const Lightbox = ({ images = [], initialIndex = 0, open, onClose }: LightboxProp
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[100] bg-background/95 backdrop-blur-md flex items-center justify-center text-foreground"
+        className="fixed inset-0 z-[100] bg-[#828282]/80 backdrop-blur-2xl flex items-center justify-center text-foreground"
       >
+        {/* Decorative Brown Gradient Glows */}
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vh] bg-primary/10 blur-[120px] rounded-full" />
+        </div>
         <button
           onClick={onClose}
-          className="absolute top-6 right-6 z-[110] p-2 bg-foreground/10 hover:bg-foreground/20 rounded-full transition-colors"
+          className="absolute top-6 right-6 z-[110] p-3 bg-white/5 hover:bg-primary/20 border border-white/10 hover:border-primary/40 rounded-full transition-all duration-300 group"
           aria-label="Close lightbox"
         >
-          <X className="w-6 h-6" />
+          <X className="w-6 h-6 text-black/70 group-hover:text-primary transition-colors" />
         </button>
 
         <div className="relative w-full h-full flex items-center justify-center p-4 md:p-12">
@@ -61,17 +65,17 @@ const Lightbox = ({ images = [], initialIndex = 0, open, onClose }: LightboxProp
             <>
               <button
                 onClick={showPrev}
-                className="absolute left-4 md:left-8 z-[110] p-3 bg-foreground/10 hover:bg-foreground/20 rounded-full transition-colors"
+                className="absolute left-4 md:left-8 z-[110] p-4 bg-white/5 hover:bg-primary/20 border border-white/10 hover:border-primary/40 rounded-full transition-all duration-300 group"
                 aria-label="Previous image"
               >
-                <ChevronLeft className="w-6 h-6" />
+                <ChevronLeft className="w-6 h-6 text-black/70 group-hover:text-primary transition-colors" />
               </button>
               <button
                 onClick={showNext}
-                className="absolute right-4 md:right-8 z-[110] p-3 bg-foreground/10 hover:bg-foreground/20 rounded-full transition-colors"
+                className="absolute right-4 md:left-auto md:right-8 z-[110] p-4 bg-white/5 hover:bg-primary/20 border border-white/10 hover:border-primary/40 rounded-full transition-all duration-300 group"
                 aria-label="Next image"
               >
-                <ChevronRight className="w-6 h-6" />
+                <ChevronRight className="w-6 h-6 text-black/70 group-hover:text-primary transition-colors" />
               </button>
             </>
           )}

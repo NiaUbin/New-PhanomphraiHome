@@ -14,6 +14,8 @@ export interface Project {
   duration?: string;
   highlights?: string[]
   gallery?: string[]
+  bedroom?: string;
+  bathroom?: string;
   created_at?: string
 }
 

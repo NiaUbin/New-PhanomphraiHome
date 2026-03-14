@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, ChangeEvent } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { Loader2, Upload, X, Plus } from "lucide-react"
+import { Loader2, Upload, X, Plus, Info, Home, Ruler, MapPin, DollarSign, Calendar, Clock, Bed, Bath, Sparkles, Image as ImageIcon } from "lucide-react"
 import { portfolioService, Project, categoryService, Category } from "@/utils/portfolioService"
 import { Button } from "@/components/ui/button"
 import {
@@ -39,6 +39,8 @@ const formSchema = z.object({
   highlights: z.array(z.string()).optional(),
   year: z.string().optional(),
   duration: z.string().optional(),
+  bedroom: z.string().optional(),
+  bathroom: z.string().optional(),
 })
 
 interface PortfolioFormProps {
@@ -75,6 +77,8 @@ export function PortfolioForm({ initialData, onSuccess }: PortfolioFormProps) {
     highlights: initialData?.highlights || [],
     year: initialData?.year || "",
     duration: initialData?.duration || "",
+    bedroom: initialData?.bedroom || "",
+    bathroom: initialData?.bathroom || "",
   }), [initialData])
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -216,76 +220,75 @@ export function PortfolioForm({ initialData, onSuccess }: PortfolioFormProps) {
           )}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="title"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>ชื่อโครงการ / รูปภาพ</FormLabel>
-                <FormControl>
-                  <Input placeholder="ชื่อโครงการ..." {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="category"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>หมวดหมู่บ้าน</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+        {/* ข้อมูลพื้นฐาน */}
+        <div className="bg-muted/30 p-6 rounded-xl border border-border/50 space-y-6">
+          <div className="flex items-center gap-2 text-primary border-b border-primary/20 pb-2 mb-4">
+            <Info className="size-4" />
+            <h3 className="font-display font-bold uppercase tracking-wider text-sm">ข้อมูลพื้นฐาน</h3>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    <Home className="size-3.5 text-muted-foreground" />
+                    ชื่อโครงการ
+                  </FormLabel>
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="เลือกหมวดหมู่" />
-                    </SelectTrigger>
+                    <Input placeholder="เช่น บ้านเดี่ยว วงศ์สว่าง" className="bg-background" {...field} />
                   </FormControl>
-                  <SelectContent>
-                    {categories.length === 0 ? (
-                      <div className="p-2 text-sm text-muted-foreground text-center">
-                        ไม่มีหมวดหมู่ กรุณาเพิ่มที่หน้าจัดการหมวดหมู่
-                      </div>
-                    ) : (
-                      categories.map((cat) => (
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    <Sparkles className="size-3.5 text-muted-foreground" />
+                    หมวดหมู่โครงการ
+                  </FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="bg-background">
+                        <SelectValue placeholder="เลือกหมวดหมู่" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {categories.map((cat) => (
                         <SelectItem key={cat.id} value={cat.name}>
                           {cat.name}
                         </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="area"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>พื้นที่ (ตร.ม.)</FormLabel>
-                <FormControl>
-                  <Input placeholder="เช่น 320 ตร.ม." {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           <FormField
             control={form.control}
-            name="location"
+            name="description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>สถานที่ / จังหวัด</FormLabel>
+                <FormLabel className="flex items-center gap-2">
+                  <ImageIcon className="size-3.5 text-muted-foreground" />
+                  คำอธิบายผลงาน
+                </FormLabel>
                 <FormControl>
-                  <Input placeholder="เช่น กรุงเทพฯ" {...field} />
+                  <Textarea 
+                    placeholder="รายละเอียดโครงการที่ต้องการแสดง..." 
+                    className="min-h-[100px] bg-background resize-none" 
+                    {...field} 
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -293,67 +296,132 @@ export function PortfolioForm({ initialData, onSuccess }: PortfolioFormProps) {
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <FormField
-            control={form.control}
-            name="price"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>ราคา</FormLabel>
-                <FormControl>
-                  <Input placeholder="เช่น 5,000,000 บาท" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        {/* ข้อมูลรายละเอียดโครงการ */}
+        <div className="bg-muted/30 p-6 rounded-xl border border-border/50 space-y-6">
+          <div className="flex items-center gap-2 text-primary border-b border-primary/20 pb-2 mb-4">
+            <Ruler className="size-4" />
+            <h3 className="font-display font-bold uppercase tracking-wider text-sm">รายละเอียดโครงการ</h3>
+          </div>
 
-          <FormField
-            control={form.control}
-            name="year"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>ปีที่แล้วเสร็จ</FormLabel>
-                <FormControl>
-                  <Input placeholder="เช่น 2024" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+             <FormField
+              control={form.control}
+              name="location"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2 text-xs">
+                    <MapPin className="size-3.5 text-muted-foreground" />
+                    สถานที่
+                  </FormLabel>
+                  <FormControl>
+                    <Input placeholder="เช่น กรุงเทพฯ" className="bg-background" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="duration"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>ระยะเวลาก่อสร้าง</FormLabel>
-                <FormControl>
-                  <Input placeholder="เช่น 8 เดือน" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name="area"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2 text-xs">
+                    <Ruler className="size-3.5 text-muted-foreground" />
+                    พื้นที่ใช้สอย
+                  </FormLabel>
+                  <FormControl>
+                    <Input placeholder="เช่น 320 ตร.ม." className="bg-background" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="price"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2 text-xs">
+                    <DollarSign className="size-3.5 text-muted-foreground" />
+                    งบประมาณ / ราคา
+                  </FormLabel>
+                  <FormControl>
+                    <Input placeholder="เช่น 5.5 ล้านบาท" className="bg-background" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 pt-2 border-t border-border/30">
+            <FormField
+              control={form.control}
+              name="year"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+                    <Calendar className="size-3.5" />
+                    ปีที่เสร็จ
+                  </FormLabel>
+                  <FormControl>
+                    <Input placeholder="2024" className="bg-background" {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="duration"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+                    <Clock className="size-3.5" />
+                    ระยะเวลา
+                  </FormLabel>
+                  <FormControl>
+                    <Input placeholder="8 เดือน" className="bg-background" {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="bedroom"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+                    <Bed className="size-3.5" />
+                    ห้องนอน
+                  </FormLabel>
+                  <FormControl>
+                    <Input placeholder="4" className="bg-background" {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="bathroom"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+                    <Bath className="size-3.5" />
+                    ห้องน้ำ
+                  </FormLabel>
+                  <FormControl>
+                    <Input placeholder="3" className="bg-background" {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </div>
         </div>
-
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>คำอธิบายผลงาน</FormLabel>
-              <FormControl>
-                <Textarea 
-                  placeholder="รายละเอียดโครงการ..." 
-                  className="min-h-[120px]" 
-                  {...field} 
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
         <FormField
           control={form.control}

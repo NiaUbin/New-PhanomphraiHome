@@ -6,17 +6,31 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   const { id } = await params;
   
   // Fetch project from Supabase
-  const { data, error } = await supabase
+  const { data: project, error } = await supabase
     .from('projects')
     .select('*')
     .eq('id', id)
     .single();
 
-  if (error || !data) {
+  if (error || !project) {
     console.error("Error fetching project:", error);
     return <ProjectDetailClient id={id} initialProject={null} />;
   }
 
-  return <ProjectDetailClient id={id} initialProject={data as Project} />;
+  // Fetch related projects (same category, different ID)
+  const { data: relatedProjects } = await supabase
+    .from('projects')
+    .select('*')
+    .eq('category', project.category)
+    .neq('id', id)
+    .limit(3);
+
+  return (
+    <ProjectDetailClient 
+      id={id} 
+      initialProject={project as Project} 
+      relatedProjects={(relatedProjects || []) as Project[]} 
+    />
+  );
 }
 

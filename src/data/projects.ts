@@ -11,6 +11,8 @@ export interface Project {
   description: string;
   highlights: string[];
   gallery: string[];
+  bedroom?: string;
+  bathroom?: string;
 }
 
 export const projects: Project[] = [
@@ -27,6 +29,8 @@ export const projects: Project[] = [
     description: 'บ้านเดี่ยวสไตล์โมเดิร์นทรอปิคอล 2 ชั้น ออกแบบโดยคำนึงถึงการระบายอากาศตามธรรมชาติ ใช้วัสดุคุณภาพสูง ผสมผสานความอบอุ่นของไม้กับความแข็งแกร่งของคอนกรีตเปลือย เน้นพื้นที่ใช้สอยกว้างขวาง เชื่อมต่อกับสวนรอบบ้านอย่างลงตัว',
     highlights: ['โครงสร้างเหล็กทนทาน', 'ระบบ Smart Home', 'สระว่ายน้ำส่วนตัว', 'ระบบโซลาร์เซลล์'],
     gallery: ['/placeholder.svg', '/placeholder.svg', '/placeholder.svg'],
+    bedroom: '4',
+    bathroom: '3',
   },
   {
     id: 'villa-pattaya',
@@ -41,6 +45,8 @@ export const projects: Project[] = [
     description: 'วิลล่าหรูสไตล์คอนเทมโพรารี่ ริมหน้าผาวิวทะเล ออกแบบเพื่อรับลมทะเลและแสงธรรมชาติ ห้องนั่งเล่นแบบ double volume ผนังกระจกบานใหญ่เปิดมุมมองสู่ท้องทะเล',
     highlights: ['วิวทะเล 180°', 'Infinity Pool', 'ห้องครัว Chef-grade', 'ระบบรักษาความปลอดภัย'],
     gallery: ['/placeholder.svg', '/placeholder.svg', '/placeholder.svg'],
+    bedroom: '5',
+    bathroom: '6',
   },
   {
     id: 'condo-sukhumvit',
@@ -55,6 +61,8 @@ export const projects: Project[] = [
     description: 'รีโนเวทคอนโดมิเนียมให้กลายเป็นพื้นที่อยู่อาศัยสไตล์ Japandi มินิมอล เน้นโทนสีอบอุ่น ใช้ไม้โอ๊คธรรมชาติ ออกแบบพื้นที่เก็บของอย่างชาญฉลาด ทุก ตร.ม. ถูกใช้ประโยชน์อย่างคุ้มค่า',
     highlights: ['Built-in ทั้งห้อง', 'ระบบไฟ Ambient', 'ครัวแบบเปิด', 'ห้องน้ำกระจกใส'],
     gallery: ['/placeholder.svg', '/placeholder.svg', '/placeholder.svg'],
+    bedroom: '2',
+    bathroom: '2',
   },
   {
     id: 'extension-nonthaburi',
@@ -69,6 +77,8 @@ export const projects: Project[] = [
     description: 'ต่อเติมพื้นที่ด้านหลังบ้านเดี่ยว เพิ่มห้องครัวขนาดใหญ่และห้องซักรีด เชื่อมต่อกับตัวบ้านเดิมอย่างกลมกลืน โครงสร้างออกแบบให้รับน้ำหนักของบ้านเดิมได้อย่างปลอดภัย',
     highlights: ['เชื่อมรอยต่อไร้รอย', 'หลังคากันความร้อน', 'ระบบระบายน้ำใหม่', 'พื้นกระเบื้องลายไม้'],
     gallery: ['/placeholder.svg', '/placeholder.svg', '/placeholder.svg'],
+    bedroom: '1',
+    bathroom: '1',
   },
   {
     id: 'bathroom-renovation',
@@ -83,6 +93,8 @@ export const projects: Project[] = [
     description: 'รีโนเวทห้องน้ำแบบครบวงจร เปลี่ยนจากห้องน้ำเก่าให้กลายเป็น spa ส่วนตัวในบ้าน ใช้หินอ่อนธรรมชาติ สุขภัณฑ์นำเข้า ระบบ rain shower พร้อมระบบน้ำร้อนจากโซลาร์',
     highlights: ['หินอ่อนอิตาลี', 'Rain Shower', 'ระบบน้ำร้อนโซลาร์', 'กระจกนิรภัย'],
     gallery: ['/placeholder.svg', '/placeholder.svg', '/placeholder.svg'],
+    bedroom: '1',
+    bathroom: '2',
   },
   {
     id: 'modern-kitchen',
@@ -97,6 +109,8 @@ export const projects: Project[] = [
     description: 'ออกแบบและรีโนเวทห้องครัวใหม่ทั้งหมด สไตล์โมเดิร์นอินดัสเทรียล เคาน์เตอร์หินแกรนิตสีเข้ม ตู้ครัวไม้วอลนัท ระบบดูดควันแรงสูง พร้อมเกาะกลางสำหรับเตรียมอาหาร',
     highlights: ['เคาน์เตอร์หินแกรนิต', 'ตู้ครัว Soft-close', 'เกาะกลางครัว', 'ระบบดูดควันแรงสูง'],
     gallery: ['/placeholder.svg', '/placeholder.svg', '/placeholder.svg'],
+    bedroom: '0',
+    bathroom: '1',
   },
 ];
 
