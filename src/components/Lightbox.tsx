@@ -84,13 +84,19 @@ const Lightbox = ({ images = [], initialIndex = 0, open, onClose }: LightboxProp
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
             className="relative max-w-5xl w-full aspect-[4/3] max-h-[80vh]"
           >
-            <Image
-              src={images[index]}
-              alt={`Gallery image ${index + 1}`}
-              fill
-              className="object-contain"
-              priority
-            />
+            {images[index] ? (
+              <Image
+                src={images[index]}
+                alt={`Gallery image ${index + 1}`}
+                fill
+                className="object-contain"
+                priority
+              />
+            ) : (
+              <div className="flex items-center justify-center w-full h-full text-muted-foreground bg-muted/20">
+                ไม่พบรูปภาพ
+              </div>
+            )}
           </motion.div>
 
           {images.length > 0 && (

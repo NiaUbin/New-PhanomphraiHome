@@ -20,12 +20,17 @@ import {
 
 const items = [
   {
-    title: "Portfolio",
+    title: "จัดการผลงาน",
     url: "/admin/portfolio",
     icon: Image,
   },
   {
-    title: "Back to Site",
+    title: "จัดการหมวดหมู่",
+    url: "/admin/categories",
+    icon: LayoutDashboard,
+  },
+  {
+    title: "กลับสู่หน้าหลัก",
     url: "/",
     icon: Home,
   },

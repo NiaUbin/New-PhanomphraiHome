@@ -128,9 +128,9 @@ export default function PortfolioAdminPage() {
                 <TableRow key={project.id}>
                   <TableCell>
                     <div className="relative size-12 rounded-md overflow-hidden bg-muted">
-                      {project.img && (
+                      {project.image_url && (
                         <Image 
-                          src={project.img} 
+                          src={project.image_url} 
                           alt={project.title} 
                           fill 
                           className="object-cover"

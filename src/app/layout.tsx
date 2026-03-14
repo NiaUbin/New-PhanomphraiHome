@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   title: "PHANOMPHRAI | ออกแบบ ก่อสร้าง ต่อเติม",
   description:
     "PHANOMPHRAI รับเหมาก่อสร้างและออกแบบสถาปัตยกรรม ก่อสร้างบ้านใหม่ ต่อเติม รีโนเวท ด้วยมาตรฐานสูงสุด",
+  icons: {
+    icon: "/favicon.png",
+  },
   openGraph: {
     title: "PHANOMPHRAI",
     description: "ออกแบบ ก่อสร้าง ต่อเติม ด้วยมาตรฐานสูงสุด",

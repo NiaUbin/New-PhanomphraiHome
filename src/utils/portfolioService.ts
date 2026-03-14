@@ -7,11 +7,11 @@ export interface Project {
   category: string
   area: string
   price: string
-  img: string
+  image_url: string // เปลี่ยนจาก img เป็น image_url ตามที่คุณต้องการ
   location?: string
-  tag?: string
-  year?: string
-  duration?: string
+  tag?: string;
+  year?: string;
+  duration?: string;
   highlights?: string[]
   gallery?: string[]
   created_at?: string
@@ -26,17 +26,6 @@ export const portfolioService = {
     
     if (error) throw error
     return data as Project[]
-  },
-
-  async getById(id: string) {
-    const { data, error } = await supabase
-      .from('projects')
-      .select('*')
-      .eq('id', id)
-      .single()
-    
-    if (error) throw error
-    return data as Project
   },
 
   async create(project: Project) {
@@ -71,19 +60,56 @@ export const portfolioService = {
 
   async uploadImage(file: File) {
     const fileExt = file.name.split('.').pop()
-    const fileName = `${Math.random()}.${fileExt}`
-    const filePath = `projects/${fileName}`
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
+    const filePath = `uploads/${fileName}`
 
     const { error: uploadError } = await supabase.storage
-      .from('portfolio')
+      .from('project-images') // เปลี่ยนชื่อ Bucket ตามที่คุณต้องการ
       .upload(filePath, file)
 
     if (uploadError) throw uploadError
 
     const { data } = supabase.storage
-      .from('portfolio')
+      .from('project-images')
       .getPublicUrl(filePath)
 
-    return data.publicUrl
+  return data.publicUrl
+  }
+}
+
+export interface Category {
+  id: string
+  name: string
+  created_at?: string
+}
+
+export const categoryService = {
+  async getAll() {
+    const { data, error } = await supabase
+      .from('categories')
+      .select('*')
+      .order('created_at', { ascending: true })
+    
+    if (error) throw error
+    return data as Category[]
+  },
+
+  async create(name: string) {
+    const { data, error } = await supabase
+      .from('categories')
+      .insert([{ name }])
+      .select()
+    
+    if (error) throw error
+    return data[0] as Category
+  },
+
+  async delete(id: string) {
+    const { error } = await supabase
+      .from('categories')
+      .delete()
+      .eq('id', id)
+    
+    if (error) throw error
   }
 }

@@ -4,8 +4,8 @@ import { useState, useMemo, useEffect, ChangeEvent } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { Loader2, Upload, X } from "lucide-react"
-import { portfolioService, Project } from "@/utils/portfolioService"
+import { Loader2, Upload, X, Plus } from "lucide-react"
+import { portfolioService, Project, categoryService, Category } from "@/utils/portfolioService"
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -33,8 +33,12 @@ const formSchema = z.object({
   category: z.string().min(1, "กรุณาเลือกหมวดหมู่"),
   area: z.string().min(1, "กรุณาระบุพื้นที่"),
   price: z.string().min(1, "กรุณาระบุราคา"),
-  img: z.string().min(1, "กรุณาอัปโหลดรูปภาพ"),
+  image_url: z.string().min(1, "กรุณาอัปโหลดรูปภาพ"),
   location: z.string().optional(),
+  gallery: z.array(z.string()).optional(),
+  highlights: z.array(z.string()).optional(),
+  year: z.string().optional(),
+  duration: z.string().optional(),
 })
 
 interface PortfolioFormProps {
@@ -45,6 +49,19 @@ interface PortfolioFormProps {
 export function PortfolioForm({ initialData, onSuccess }: PortfolioFormProps) {
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [categories, setCategories] = useState<Category[]>([])
+
+  useEffect(() => {
+    const fetchCats = async () => {
+      try {
+        const data = await categoryService.getAll()
+        setCategories(data)
+      } catch (error) {
+        console.error("Failed to fetch categories:", error)
+      }
+    }
+    fetchCats()
+  }, [])
 
   const defaultValues = useMemo(() => ({
     title: initialData?.title || "",
@@ -52,8 +69,12 @@ export function PortfolioForm({ initialData, onSuccess }: PortfolioFormProps) {
     category: initialData?.category || "",
     area: initialData?.area || "",
     price: initialData?.price || "",
-    img: initialData?.img || "",
+    image_url: initialData?.image_url || "",
     location: initialData?.location || "",
+    gallery: initialData?.gallery || [],
+    highlights: initialData?.highlights || [],
+    year: initialData?.year || "",
+    duration: initialData?.duration || "",
   }), [initialData])
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -79,7 +100,8 @@ export function PortfolioForm({ initialData, onSuccess }: PortfolioFormProps) {
       onSuccess()
     } catch (error) {
       console.error(error)
-      toast.error("เกิดข้อผิดพลาดในการบันทึกข้อมูล")
+      const errorMessage = error instanceof Error ? error.message : "เกิดข้อผิดพลาดในการบันทึกข้อมูล"
+      toast.error(`ไม่สามารถบันทึกได้: ${errorMessage}`)
     } finally {
       setLoading(false)
     }
@@ -92,7 +114,7 @@ export function PortfolioForm({ initialData, onSuccess }: PortfolioFormProps) {
     try {
       setUploading(true)
       const url = await portfolioService.uploadImage(file)
-      form.setValue("img", url)
+      form.setValue("image_url", url)
       toast.success("อัปโหลดรูปภาพสำเร็จ")
     } catch (error) {
       console.error(error)
@@ -102,12 +124,52 @@ export function PortfolioForm({ initialData, onSuccess }: PortfolioFormProps) {
     }
   }
 
+  const handleGalleryUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+
+    try {
+      setUploading(true)
+      const currentGallery = form.getValues("gallery") || []
+      const uploadPromises = Array.from(files).map(file => portfolioService.uploadImage(file))
+      const newUrls = await Promise.all(uploadPromises)
+      
+      form.setValue("gallery", [...currentGallery, ...newUrls])
+      toast.success(`อัปโหลดรูปภาพ ${newUrls.length} รูปสำเร็จ`)
+    } catch (error) {
+      console.error(error)
+      toast.error("อัปโหลดรูปภาพบางส่วนไม่สำเร็จ")
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const removeGalleryImage = (index: number) => {
+    const currentGallery = form.getValues("gallery") || []
+    const newGallery = currentGallery.filter((_, i) => i !== index)
+    form.setValue("gallery", newGallery)
+  }
+
+  const [highlightInput, setHighlightInput] = useState("")
+
+  const addHighlight = () => {
+    if (!highlightInput.trim()) return
+    const current = form.getValues("highlights") || []
+    form.setValue("highlights", [...current, highlightInput.trim()])
+    setHighlightInput("")
+  }
+
+  const removeHighlight = (index: number) => {
+    const current = form.getValues("highlights") || []
+    form.setValue("highlights", current.filter((_, i) => i !== index))
+  }
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={form.control}
-          name="img"
+          name="image_url"
           render={({ field }) => (
             <FormItem>
               <FormLabel>รูปภาพหน้าปก</FormLabel>
@@ -182,10 +244,17 @@ export function PortfolioForm({ initialData, onSuccess }: PortfolioFormProps) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="บ้านใหม่">บ้านใหม่</SelectItem>
-                    <SelectItem value="ต่อเติม">ต่อเติม</SelectItem>
-                    <SelectItem value="รีโนเวท">รีโนเวท</SelectItem>
-                    <SelectItem value="คอนโด">คอนโด</SelectItem>
+                    {categories.length === 0 ? (
+                      <div className="p-2 text-sm text-muted-foreground text-center">
+                        ไม่มีหมวดหมู่ กรุณาเพิ่มที่หน้าจัดการหมวดหมู่
+                      </div>
+                    ) : (
+                      categories.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.name}>
+                          {cat.name}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -224,19 +293,49 @@ export function PortfolioForm({ initialData, onSuccess }: PortfolioFormProps) {
           />
         </div>
 
-        <FormField
-          control={form.control}
-          name="price"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>ราคา</FormLabel>
-              <FormControl>
-                <Input placeholder="เช่น 5,000,000 บาท" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <FormField
+            control={form.control}
+            name="price"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>ราคา</FormLabel>
+                <FormControl>
+                  <Input placeholder="เช่น 5,000,000 บาท" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="year"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>ปีที่แล้วเสร็จ</FormLabel>
+                <FormControl>
+                  <Input placeholder="เช่น 2024" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="duration"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>ระยะเวลาก่อสร้าง</FormLabel>
+                <FormControl>
+                  <Input placeholder="เช่น 8 เดือน" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <FormField
           control={form.control}
@@ -250,6 +349,102 @@ export function PortfolioForm({ initialData, onSuccess }: PortfolioFormProps) {
                   className="min-h-[120px]" 
                   {...field} 
                 />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="highlights"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>จุดเด่นโครงการ (ทีละข้อ)</FormLabel>
+              <div className="space-y-4">
+                <div className="flex gap-2">
+                  <Input 
+                    placeholder="เช่น ระบบ Smart Home, สระว่ายน้ำส่วนตัว..." 
+                    value={highlightInput}
+                    onChange={(e) => setHighlightInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        addHighlight()
+                      }
+                    }}
+                  />
+                  <Button type="button" onClick={addHighlight} variant="outline" className="shrink-0">
+                    <Plus className="size-4 mr-2" />
+                    เพิ่มข้อความ
+                  </Button>
+                </div>
+                
+                <div className="space-y-2">
+                  {field.value?.map((item, index) => (
+                    <div key={index} className="flex items-center gap-3 bg-muted/50 p-3 rounded-lg border group animate-in slide-in-from-left-2 duration-200">
+                      <span className="flex-shrink-0 w-6 h-6 bg-primary/20 text-primary text-[10px] font-bold rounded-full flex items-center justify-center">
+                        {index + 1}
+                      </span>
+                      <span className="flex-1 text-sm">{item}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeHighlight(index)}
+                        className="p-1 hover:bg-destructive/10 text-muted-foreground hover:text-destructive rounded-md transition-colors"
+                      >
+                        <X className="size-4" />
+                      </button>
+                    </div>
+                  ))}
+                  {(!field.value || field.value.length === 0) && (
+                    <p className="text-xs text-muted-foreground italic text-center py-2">ยังไม่มีการระบุจุดเด่นโครงการ</p>
+                  )}
+                </div>
+              </div>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="gallery"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>แกลเลอรี่รูปภาพเพิ่มเติม</FormLabel>
+              <FormControl>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {field.value?.map((url, index) => (
+                      <div key={url + index} className="relative aspect-square rounded-lg overflow-hidden border group">
+                        <Image 
+                          src={url} 
+                          alt={`Gallery ${index}`} 
+                          fill 
+                          className="object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeGalleryImage(index)}
+                          className="absolute top-1 right-1 p-1 bg-destructive/80 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="size-3" />
+                        </button>
+                      </div>
+                    ))}
+                    <div className="relative aspect-square border-2 border-dashed rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors flex flex-col items-center justify-center cursor-pointer">
+                      <Upload className="size-6 text-muted-foreground mb-1" />
+                      <span className="text-[10px] text-muted-foreground">เพิ่มรูป</span>
+                      <input
+                        type="file"
+                        multiple
+                        className="absolute inset-0 opacity-0 cursor-pointer"
+                        onChange={handleGalleryUpload}
+                        accept="image/*"
+                      />
+                    </div>
+                  </div>
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>

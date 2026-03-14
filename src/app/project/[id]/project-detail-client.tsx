@@ -3,18 +3,22 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { projects, Project } from "@/data/projects";
+import { projects } from "@/data/projects";
 import { motion } from "framer-motion";
 import { ArrowLeft, MapPin, Calendar, Ruler, Clock } from "lucide-react";
 import ScrollReveal from "@/components/ScrollReveal";
 import Lightbox from "@/components/Lightbox";
+import { Project as SupabaseProject } from "@/utils/portfolioService";
 
 interface ProjectDetailClientProps {
   id: string;
+  initialProject?: SupabaseProject | null;
 }
 
-const ProjectDetailClient = ({ id }: ProjectDetailClientProps) => {
-  const project = projects.find((p) => p.id === id);
+const ProjectDetailClient = ({ id, initialProject }: ProjectDetailClientProps) => {
+  // Use initialProject if provided (from Supabase), otherwise fall back to static data
+  const staticProject = projects.find((p) => p.id === id);
+  const project = initialProject || staticProject;
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -37,7 +41,26 @@ const ProjectDetailClient = ({ id }: ProjectDetailClientProps) => {
     );
   }
 
-  const related = projects.filter((p) => p.category === project.category && p.id !== project.id).slice(0, 3);
+  const related = projects.filter((p) => {
+    const isSameCategory = p.category === project.category;
+    const isDifferentProject = String(p.id) !== String(id);
+    return isSameCategory && isDifferentProject;
+  }).slice(0, 3);
+  
+  // Ensure gallery images are valid non-empty strings
+  const gallery = (project.gallery || []).filter(img => typeof img === 'string' && img.trim() !== "");
+  const highlights = project.highlights || ['โครงสร้างคุณภาพ', 'ตรวจสอบทุกขั้นตอน', 'รับประกันผลงาน'];
+
+  // Safe image path logic
+  const getSafeImage = (p: { image_url?: string; img?: string }) => {
+    const url = p.image_url || p.img;
+    return (url && url.trim() !== "") ? url : '/placeholder.svg';
+  };
+
+  const mainImage = getSafeImage(project);
+
+  // Define images for the lightbox - ensure it's never empty to avoid Next.js Image errors
+  const lightboxImages = gallery.length > 0 ? gallery : [mainImage];
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -66,7 +89,7 @@ const ProjectDetailClient = ({ id }: ProjectDetailClientProps) => {
         onClick={() => openLightbox(0)}
       >
         <Image 
-          src={project.img} 
+          src={mainImage} 
           alt={project.title} 
           fill
           className="object-cover"
@@ -110,9 +133,9 @@ const ProjectDetailClient = ({ id }: ProjectDetailClientProps) => {
       <div className="border-y border-border bg-card">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8 grid grid-cols-2 md:grid-cols-4 gap-8">
           {[
-            { Icon: Calendar, label: 'ปีที่แล้วเสร็จ', value: project.year },
+            { Icon: Calendar, label: 'ปีที่แล้วเสร็จ', value: project.year || '2024' },
             { Icon: Ruler, label: 'พื้นที่', value: project.area },
-            { Icon: Clock, label: 'ระยะเวลา', value: project.duration },
+            { Icon: Clock, label: 'ระยะเวลา', value: project.duration || '8 เดือน' },
             { Icon: MapPin, label: 'สถานที่', value: project.location },
           ].map((item) => (
             <div key={item.label} className="flex items-center gap-4">
@@ -129,7 +152,7 @@ const ProjectDetailClient = ({ id }: ProjectDetailClientProps) => {
       </div>
 
       {/* Gallery grid */}
-      {project.gallery && project.gallery.length > 0 && (
+      {gallery.length > 0 && (
         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16 lg:py-24">
           <ScrollReveal>
             <span className="section-label mb-4 block text-primary font-mono text-xs uppercase tracking-widest">
@@ -140,7 +163,7 @@ const ProjectDetailClient = ({ id }: ProjectDetailClientProps) => {
             </h2>
           </ScrollReveal>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-            {project.gallery.map((img, i) => (
+            {gallery.map((img, i) => (
               <ScrollReveal key={i} delay={i * 80}>
                 <button
                   onClick={() => openLightbox(i)}
@@ -189,7 +212,7 @@ const ProjectDetailClient = ({ id }: ProjectDetailClientProps) => {
               จุดเด่น
             </span>
             <div className="space-y-6 mt-8">
-              {project.highlights.map((item, i) => (
+              {highlights.map((item, i) => (
                 <div key={i} className="flex items-start gap-4 group">
                   <span className="flex-shrink-0 w-8 h-8 border border-primary/30 flex items-center justify-center font-mono text-xs text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
                     {String(i + 1).padStart(2, '0')}
@@ -219,7 +242,7 @@ const ProjectDetailClient = ({ id }: ProjectDetailClientProps) => {
                 <ScrollReveal key={p.id} delay={i * 100}>
                   <Link href={`/project/${p.id}`} className="group block relative overflow-hidden aspect-[4/3] rounded-sm">
                     <Image 
-                      src={p.img} 
+                      src={getSafeImage(p)} 
                       alt={p.title} 
                       fill
                       className="object-cover transition-transform duration-700 group-hover:scale-110" 
@@ -254,7 +277,7 @@ const ProjectDetailClient = ({ id }: ProjectDetailClientProps) => {
 
       {/* Lightbox */}
       <Lightbox
-        images={project.gallery}
+        images={lightboxImages}
         initialIndex={lightboxIndex}
         open={lightboxOpen}
         onClose={() => setLightboxOpen(false)}
