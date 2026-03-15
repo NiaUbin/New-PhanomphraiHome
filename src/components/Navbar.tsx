@@ -1,10 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const pathname = usePathname();
+  const isHome = pathname === '/';
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 80);
@@ -13,13 +17,15 @@ const Navbar = () => {
   }, []);
 
   const navLinks = [
-    { href: '#services', label: 'บริการ' },
-    { href: '#process', label: 'ขั้นตอน' },
-    { href: '#portfolio', label: 'ผลงาน' },
-    { href: '#why-us', label: 'ทำไมต้องเรา' },
-    { href: '#testimonials', label: 'รีวิว' },
-    { href: '#contact', label: 'ติดต่อ' },
+    { href: isHome ? '#services' : '/#services', label: 'บริการ' },
+    { href: isHome ? '#process' : '/#process', label: 'ขั้นตอน' },
+    { href: isHome ? '#portfolio' : '/#portfolio', label: 'ผลงาน' },
+    { href: isHome ? '#why-us' : '/#why-us', label: 'ทำไมต้องเรา' },
+    { href: isHome ? '#testimonials' : '/#testimonials', label: 'รีวิว' },
+    { href: isHome ? '#contact' : '/#contact', label: 'ติดต่อ' },
   ];
+
+  const closeMobile = () => setMobileOpen(false);
 
   return (
     <nav
@@ -30,20 +36,24 @@ const Navbar = () => {
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-8 flex items-center justify-between h-20">
-        <a href="#" className="font-display text-2xl font-bold tracking-wider text-foreground">
-          PHANOM<span className="text-primary">PHRAI</span>
-        </a>
+        <Link href="/" className="font-display text-2xl font-bold tracking-wider text-foreground">
+          PHANOM<span className="text-primary">PHRAI PK</span>
+        </Link>
 
         {/* Desktop */}
         <div className="hidden lg:flex items-center gap-8">
           {navLinks.map((link) => (
-            <a key={link.href} href={link.href} className="relative font-mono text-sm font-medium uppercase tracking-widest text-foreground/70 hover:text-primary transition-colors duration-300 after:absolute after:bottom-[-4px] after:left-0 after:h-[1.5px] after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full">
+            <Link 
+              key={link.href} 
+              href={link.href} 
+              className="relative font-mono text-sm font-medium uppercase tracking-widest text-foreground/70 hover:text-primary transition-colors duration-300 after:absolute after:bottom-[-4px] after:left-0 after:h-[1.5px] after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
+            >
               {link.label}
-            </a>
+            </Link>
           ))}
-          <a href="#contact" className="btn-primary ml-4">
+          <Link href={isHome ? '#contact' : '/#contact'} className="btn-primary ml-4">
             <span>ขอใบเสนอราคา</span>
-          </a>
+          </Link>
         </div>
 
         {/* Mobile toggle */}
@@ -62,17 +72,22 @@ const Navbar = () => {
       {mobileOpen && (
         <div className="lg:hidden bg-background/95 backdrop-blur-xl border-t border-border/50 px-6 py-8 space-y-6">
           {navLinks.map((link) => (
-            <a key={link.href} href={link.href} className="block font-mono text-sm font-medium uppercase tracking-widest text-foreground/70 hover:text-primary transition-colors">
+            <Link 
+              key={link.href} 
+              href={link.href} 
+              onClick={closeMobile}
+              className="block font-mono text-sm font-medium uppercase tracking-widest text-foreground/70 hover:text-primary transition-colors"
+            >
               {link.label}
-            </a>
+            </Link>
           ))}
-          <a href="#contact" onClick={() => setMobileOpen(false)} className="btn-primary inline-block">
+          <Link href={isHome ? '#contact' : '/#contact'} onClick={closeMobile} className="btn-primary inline-block">
             <span>ขอใบเสนอราคา</span>
-          </a>
+          </Link>
         </div>
       )}
     </nav>
   );
 };
 
-export default Navbar;
+export default Navbar;

@@ -1,4 +1,5 @@
 import ProjectDetailClient from "./project-detail-client";
+import { notFound } from "next/navigation";
 import { supabase } from "@/utils/supabase";
 import { Project } from "@/utils/portfolioService";
 
@@ -13,8 +14,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
     .single();
 
   if (error || !project) {
-    console.error("Error fetching project:", error);
-    return <ProjectDetailClient id={id} initialProject={null} />;
+    notFound();
   }
 
   // Fetch related projects (same category, different ID)
