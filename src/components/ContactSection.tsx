@@ -40,7 +40,7 @@ const ContactSection = () => {
     <section id="contact" className="py-24 lg:py-32 relative">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <ScrollReveal>
-          <span className="section-label mb-4">ติดต่อ</span>
+          <span className="section-label mb-4">Contact</span>
           <h2 className="font-display text-4xl md:text-6xl font-bold text-foreground mb-16">
             ติดต่อ<span className="text-primary">เรา</span>
           </h2>

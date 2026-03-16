@@ -3,12 +3,34 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { projects } from "@/data/projects";
 import { motion } from "framer-motion";
-import { ArrowLeft, MapPin, Calendar, Ruler, Clock, Bed, Bath } from "lucide-react";
+import {
+  ArrowLeft,
+  MapPin,
+  Calendar,
+  Ruler,
+  Clock,
+  Bed,
+  Bath,
+  ChevronRight,
+} from "lucide-react";
+import {
+  CalendarDays,
+  Maximize2,
+  BedDouble,
+  ShowerHead,
+  Hourglass,
+  LocateFixed,
+} from "lucide-react";
+
+import { projects } from "@/data/projects";
 import ScrollReveal from "@/components/ScrollReveal";
 import Lightbox from "@/components/Lightbox";
 import { Project as SupabaseProject } from "@/utils/portfolioService";
+
+// ─── Props & Types ──────────────────────────────────────────────────
+
+type UnifiedProject = SupabaseProject & { img?: string };
 
 interface ProjectDetailClientProps {
   id: string;
@@ -16,324 +38,66 @@ interface ProjectDetailClientProps {
   relatedProjects?: SupabaseProject[];
 }
 
-const ProjectDetailClient = ({ id, initialProject, relatedProjects }: ProjectDetailClientProps) => {
-  // Use initialProject if provided (from Supabase), otherwise fall back to static data
+// ─── Helpers ────────────────────────────────────────────────────────
+
+const getSafeImage = (p: UnifiedProject | undefined) => {
+  const url = p?.image_url || p?.img;
+  return url && url.trim() !== "" ? url : "/placeholder.svg";
+};
+
+// ─── Main Component ─────────────────────────────────────────────────
+
+const ProjectDetailClient = ({
+  id,
+  initialProject,
+  relatedProjects,
+}: ProjectDetailClientProps) => {
   const staticProject = projects.find((p) => p.id === id);
-  const project = initialProject || staticProject;
+  const project = (initialProject || staticProject) as UnifiedProject | undefined;
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  if (!project) return <ProjectNotFound />;
+
+  const gallery = (project.gallery || []).filter(
+    (img: string) => typeof img === "string" && img.trim() !== ""
+  );
 
   const openLightbox = (index: number) => {
     setLightboxIndex(index);
     setLightboxOpen(true);
   };
 
-  if (!project) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <h1 className="font-display text-4xl font-bold text-foreground mb-4">ไม่พบโครงการ</h1>
-          <Link href="/#portfolio" className="text-primary font-mono text-sm uppercase tracking-widest hover:underline">
-            ← กลับไปดูผลงาน
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  const related = relatedProjects || [];
-  
-  // Ensure gallery images are valid non-empty strings
-  const gallery = (project.gallery || []).filter(img => typeof img === 'string' && img.trim() !== "");
-  const highlights = project.highlights || ['โครงสร้างคุณภาพ', 'ตรวจสอบทุกขั้นตอน', 'รับประกันผลงาน'];
-
-  // Safe image path logic
-  const getSafeImage = (p: { image_url?: string; img?: string }) => {
-    const url = p.image_url || p.img;
-    return (url && url.trim() !== "") ? url : '/placeholder.svg';
-  };
-
-  const mainImage = getSafeImage(project);
-
-  // Define images for the lightbox - ensure it's never empty to avoid Next.js Image errors
-  const lightboxImages = gallery.length > 0 ? gallery : [mainImage];
-
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Top bar */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 flex items-center justify-between h-20">
-          <Link href="/" className="font-display text-2xl font-bold tracking-wider text-foreground">
-            PHANOMPHRAI <span className="text-primary">PK</span>
-          </Link>
-          <Link
-            href="/#portfolio"
-            className="font-mono text-xs uppercase tracking-widest text-foreground/70 hover:text-primary transition-colors flex items-center gap-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            กลับไปดูผลงาน
-          </Link>
-        </div>
-      </div>
+      <HeaderNav />
 
-      {/* Hero image */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
-        className="relative w-full h-[60vh] lg:h-[70vh] mt-20 overflow-hidden cursor-pointer"
-        onClick={() => openLightbox(0)}
-      >
-        <Image 
-          src={mainImage} 
-          alt={project.title} 
-          fill
-          className="object-cover"
-          priority
-        />
-        <div className="absolute inset-0 bg-black/20" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-transparent hidden lg:block" />
+      <ProjectHero
+        project={project}
+        onImageClick={() => openLightbox(0)}
+      />
 
-        <div className="absolute bottom-0 left-0 right-0 p-8 lg:p-20">
-          <div className="max-w-7xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }} 
-              animate={{ opacity: 1, x: 0 }} 
-              transition={{ delay: 0.3 }}
-              className="inline-flex items-center gap-2 mb-4"
-            >
-              <span className="w-8 h-px bg-primary" />
-              <span className="font-mono text-xs uppercase tracking-[0.3em] text-primary/90 font-bold">
-                {project.tag || 'บ้านใหม่'}
-              </span>
-            </motion.div>
-            
-            <motion.h1 
-              initial={{ opacity: 0, y: 30 }} 
-              animate={{ opacity: 1, y: 0 }} 
-              transition={{ delay: 0.4 }} 
-              className="font-display text-4xl md:text-6xl lg:text-7xl font-bold mb-6 text-white leading-tight tracking-tight drop-shadow-2xl"
-            >
-              {project.title}
-            </motion.h1>
+      <ProjectStatsBar project={project} />
 
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }} 
-              animate={{ opacity: 1, y: 0 }} 
-              transition={{ delay: 0.5 }} 
-              className="flex items-center gap-3 text-white/90 font-body bg-black/20 backdrop-blur-md w-fit px-4 py-2 rounded-sm border border-white/10"
-            >
-              <MapPin className="w-5 h-5 text-primary" />
-              <span className="text-lg font-medium tracking-wide">{project.location || 'กรุงเทพฯ'}</span>
-            </motion.div>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Info bar */}
-      <div className="border-y border-border bg-card">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8 md:py-12">
-          {/* Main Stats Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {[
-              { Icon: Calendar, label: 'ปีที่แล้วเสร็จ', value: project.year || '2024' },
-              { Icon: Ruler, label: 'พื้นที่', value: project.area },
-              { Icon: Clock, label: 'ระยะเวลา', value: project.duration || '8 เดือน' },
-              { Icon: MapPin, label: 'สถานที่', value: project.location || 'กรุงเทพฯ' },
-            ].map((item) => (
-              <div key={item.label} className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-primary/10 flex items-center justify-center rounded-sm">
-                  <item.Icon className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-1">{item.label}</p>
-                  <p className="font-body text-sm font-semibold text-foreground">{item.value}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Highlighted Bedrooms/Bathrooms - Centered with same style as others */}
-          <div className="flex flex-wrap justify-center gap-x-16 gap-y-8 mt-10 pt-10 border-t border-border/40 relative">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
-            {[
-              { Icon: Bed, label: 'ห้องนอน', value: project.bedroom || '3' },
-              { Icon: Bath, label: 'ห้องน้ำ', value: project.bathroom || '2' },
-            ].map((item) => (
-              <div key={item.label} className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-primary/10 flex items-center justify-center rounded-sm">
-                  <item.Icon className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-1">{item.label}</p>
-                  <p className="font-body text-sm font-semibold text-foreground">{item.value}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Gallery grid */}
       {gallery.length > 0 && (
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16 lg:py-24">
-          <ScrollReveal>
-            <span className="section-label mb-4 block text-primary font-mono text-xs uppercase tracking-widest">
-              แกลเลอรี่โครงการ
-            </span>
-            <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-12">
-              ภาพ<span className="text-primary">ผลงาน</span>
-            </h2>
-          </ScrollReveal>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-            {gallery.map((img, i) => (
-              <ScrollReveal key={i} delay={i * 80}>
-                <button
-                  onClick={() => openLightbox(i)}
-                  className={`group relative overflow-hidden w-full rounded-sm ${
-                    i === 0 ? 'md:col-span-2 md:row-span-2 aspect-[4/3]' : 'aspect-[4/3]'
-                  }`}
-                >
-                  <Image
-                    src={img}
-                    alt={`${project.title} - ภาพที่ ${i + 1}`}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/20 transition-all duration-500" />
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-background/20 backdrop-blur-[2px]">
-                    <span className="font-mono text-xs uppercase tracking-widest text-foreground bg-background px-4 py-2 border border-border">
-                      ดูรูปขยาย
-                    </span>
-                  </div>
-                </button>
-              </ScrollReveal>
-            ))}
-          </div>
-        </div>
+        <ProjectGallery
+          project={project}
+          gallery={gallery}
+          onImageClick={openLightbox}
+        />
       )}
 
-      {/* Content Section */}
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-20 lg:py-28 border-t border-border/40 bg-gradient-to-b from-transparent to-card/20">
-        <div className="grid lg:grid-cols-3 gap-20">
-          <ScrollReveal className="lg:col-span-2">
-            <div className="inline-flex items-center gap-3 mb-6 bg-primary/10 px-4 py-1 rounded-full border border-primary/20">
-              <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-              <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary font-bold">
-                Project Detail
-              </span>
-            </div>
-            <h2 className="font-display text-4xl lg:text-5xl font-bold text-foreground mb-10 leading-tight">
-              รายละเอียด<span className="text-primary italic">ของผลงาน</span>
-            </h2>
-            <div className="prose prose-invert max-w-none">
-              <p className="font-body text-foreground/80 leading-relaxed text-xl mb-6 font-light">
-                {project.description}
-              </p>
-            </div>
-          </ScrollReveal>
+      <ProjectContent project={project} />
 
-          <ScrollReveal delay={200}>
-            <div className="bg-card/50 backdrop-blur-sm border border-border/40 p-8 rounded-sm relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 blur-3xl -translate-y-1/2 translate-x-1/2" />
-              <span className="font-display text-xl font-bold text-foreground mb-8 block border-b border-border/40 pb-4">
-                จุดบันทึก<span className="text-primary">สำคัญ</span>
-              </span>
-              <div className="space-y-6">
-                {highlights.map((item, i) => (
-                  <div key={i} className="flex items-start gap-4 group/item">
-                    <span className="flex-shrink-0 w-8 h-8 rounded-sm border border-primary/20 flex items-center justify-center font-mono text-xs text-primary group-hover/item:bg-primary group-hover/item:text-white transition-all duration-300">
-                      {(i + 1).toString().padStart(2, '0')}
-                    </span>
-                    <span className="font-body text-foreground/70 group-hover/item:text-foreground transition-colors pt-1 leading-snug font-medium">{item}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </ScrollReveal>
-        </div>
-      </div>
+      <RelatedProjectsSection
+        related={relatedProjects || []}
+      />
 
-      {/* Related projects */}
-      <div className="border-t border-border bg-card/30">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16 lg:py-24">
-          <ScrollReveal>
-            <span className="section-label mb-4 block text-primary font-mono text-xs uppercase tracking-widest">
-              ผลงานที่เกี่ยวข้อง
-            </span>
-            <h2 className="font-display text-3xl font-bold text-foreground mb-12">
-              โครงการ<span className="text-primary">อื่นๆ</span>
-            </h2>
-          </ScrollReveal>
+      <ProjectCTA />
 
-          {related.length > 0 ? (
-            <div className="grid md:grid-cols-3 gap-6">
-              {related.map((p, i) => (
-                <ScrollReveal key={p.id} delay={i * 100}>
-                  <Link href={`/project/${p.id}`} className="group block relative overflow-hidden aspect-[4/3] rounded-sm">
-                    <Image 
-                      src={getSafeImage(p)} 
-                      alt={p.title} 
-                      fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-110" 
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-70 group-hover:opacity-90 transition-all duration-500" />
-                    <div className="absolute inset-0 flex flex-col justify-end p-8">
-                      <div className="translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="w-4 h-px bg-primary" />
-                          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary font-bold">{p.category || p.tag || 'โครงการ'}</span>
-                        </div>
-                        <h3 className="font-display text-2xl font-bold text-white mb-2 leading-tight drop-shadow-sm transition-colors group-hover:text-primary-foreground/90">{p.title}</h3>
-                        <div className="flex items-center gap-2 text-white/50 font-mono text-[10px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">
-                          ดูโครงการ <span className="text-primary">→</span>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                </ScrollReveal>
-              ))}
-            </div>
-          ) : (
-            <ScrollReveal>
-              <div className="py-20 text-center border border-dashed border-primary/20 rounded-sm bg-background/40 backdrop-blur-md relative overflow-hidden group">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-50" />
-                <div className="relative z-10">
-                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-primary/20 group-hover:scale-110 transition-transform duration-500">
-                    <Ruler className="w-7 h-7 text-primary/40" />
-                  </div>
-                  <h3 className="font-display text-xl font-semibold text-foreground/80 mb-2">ยังไม่มีผลงานที่เกี่ยวข้อง</h3>
-                  <p className="font-body text-muted-foreground/60 max-w-md mx-auto px-6">
-                    เรากำลังวางแผนและสร้างสรรค์ผลงานใหม่ในหมวดหมู่นี้อย่างต่อเนื่อง โปรดติดตามเร็วๆ นี้
-                  </p>
-                  <div className="mt-8">
-                    <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary/40">Phanomphrai Home Portfolio</span>
-                  </div>
-                </div>
-              </div>
-            </ScrollReveal>
-          )}
-        </div>
-      </div>
-
-      {/* CTA */}
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-24 text-center">
-        <ScrollReveal>
-          <p className="font-body text-muted-foreground mb-6 text-lg">สนใจโครงการแบบนี้ หรือต้องการปรึกษาเรื่องการสร้างบ้าน?</p>
-          <Link 
-            href="/#contact" 
-            className="inline-flex items-center justify-center px-10 py-4 bg-primary text-primary-foreground font-display font-semibold tracking-wide hover:bg-primary/90 transition-all hover:scale-105 active:scale-95"
-          >
-            ขอใบเสนอราคาฟรี
-          </Link>
-        </ScrollReveal>
-      </div>
-
-      {/* Lightbox */}
       <Lightbox
-        images={lightboxImages}
+        images={gallery.length > 0 ? gallery : [getSafeImage(project)]}
         initialIndex={lightboxIndex}
         open={lightboxOpen}
         onClose={() => setLightboxOpen(false)}
@@ -341,5 +105,322 @@ const ProjectDetailClient = ({ id, initialProject, relatedProjects }: ProjectDet
     </div>
   );
 };
+
+// ─── Sub-Components ────────────────────────────────────────────────
+
+const HeaderNav = () => (
+  <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border/40">
+    <div className="max-w-7xl mx-auto px-6 lg:px-10 h-[68px] flex items-center justify-between">
+      <Link href="/" className="font-display text-xl font-bold tracking-wider">
+        PHANOMPHRAI <span className="text-primary">PK</span>
+      </Link>
+      <Link
+        href="/#portfolio"
+        className="group flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
+        กลับไปหน้าผลงาน
+      </Link>
+    </div>
+  </header>
+);
+
+const ProjectHero = ({ project, onImageClick }: { project: UnifiedProject; onImageClick: () => void }) => {
+  const mainImage = getSafeImage(project);
+
+  return (
+    <motion.section
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.9 }}
+      className="relative w-full mt-[68px] overflow-hidden cursor-pointer"
+      style={{ height: "min(72vh, 760px)" }}
+      onClick={onImageClick}
+    >
+      <Image
+        src={mainImage}
+        alt={project.title}
+        fill
+        className="object-cover"
+        priority
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+
+      <div className="absolute bottom-0 left-0 right-0 px-8 pb-12 lg:px-16 lg:pb-16">
+        <div className="max-w-7xl mx-auto">
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+            className="font-mono text-[11px] uppercase tracking-[0.35em] text-primary mb-3"
+          >
+            {project.category}
+          </motion.p>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45 }}
+            className="font-display text-4xl md:text-6xl lg:text-[5.5rem] font-bold text-white leading-[1.05] tracking-tight mb-6"
+          >
+            {project.title}
+          </motion.h1>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.55 }}
+            className="flex items-center gap-2 text-white/70"
+          >
+            <MapPin className="w-4 h-4 text-primary shrink-0" />
+            <span className="font-body text-sm tracking-wide">
+              {project.location}
+            </span>
+          </motion.div>
+        </div>
+      </div>
+    </motion.section>
+  );
+};
+
+const ProjectStatsBar = ({ project }: { project: UnifiedProject }) => {
+  const stats = [
+    { Icon: CalendarDays, label: "ปีที่แล้วเสร็จ", value: project.year || "2024" },
+    { Icon: Maximize2, label: "พื้นที่", value: project.area || "—" },
+    { Icon: BedDouble, label: "ห้องนอน", value: project.bedroom || "3" },
+    { Icon: ShowerHead, label: "ห้องน้ำ", value: project.bathroom || "2" },
+    { Icon: Hourglass, label: "ระยะเวลา", value: project.duration || "8 เดือน" },
+    { Icon: LocateFixed, label: "สถานที่", value: project.location || "กรุงเทพฯ" },
+  ];
+
+  return (
+    <div className="border-y border-border bg-card">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-10 md:py-14">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-x-8 gap-y-10">
+          {stats.map((item) => (
+            <div key={item.label} className="flex items-center gap-4">
+              <div className="w-11 h-11 bg-primary/10 flex items-center justify-center rounded-xl shrink-0">
+                <item.Icon className="w-5 h-5 text-primary" />
+              </div>
+              <div className="min-w-0">
+                <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5 truncate">
+                  {item.label}
+                </p>
+                <p className="font-body text-sm font-semibold text-foreground truncate">
+                  {item.value}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ProjectGallery = ({
+  project,
+  gallery,
+  onImageClick,
+}: {
+  project: UnifiedProject;
+  gallery: string[];
+  onImageClick: (idx: number) => void;
+}) => (
+  <section className="max-w-7xl mx-auto px-6 lg:px-10 py-20 lg:py-28">
+    <ScrollReveal>
+      <div className="flex items-end justify-between mb-10">
+        <div>
+          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary mb-2">
+            แกลเลอรี่
+          </p>
+          <h2 className="font-display text-3xl font-bold">ภาพผลงาน</h2>
+        </div>
+        <span className="hidden md:block font-mono text-[10px] text-muted-foreground uppercase tracking-widest">
+          {gallery.length} ภาพ
+        </span>
+      </div>
+    </ScrollReveal>
+
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+      {gallery.map((img, i) => (
+        <ScrollReveal key={i} delay={i * 60}>
+          <button
+            onClick={() => onImageClick(i)}
+            className={`group relative overflow-hidden w-full rounded-sm bg-muted ${
+              i === 0 ? "md:col-span-2 md:row-span-2 aspect-[16/10]" : "aspect-[4/3]"
+            }`}
+          >
+            <Image
+              src={img}
+              alt={`${project.title} — ${i + 1}`}
+              fill
+              className="object-cover transition-transform duration-700 ease-[cubic-bezier(.25,.46,.45,.94)] group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-500" />
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-400">
+              <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-white border border-white/50 px-4 py-2">
+                ขยาย
+              </span>
+            </div>
+          </button>
+        </ScrollReveal>
+      ))}
+    </div>
+  </section>
+);
+
+const ProjectContent = ({ project }: { project: UnifiedProject }) => {
+  const highlights = project.highlights || [
+    "โครงสร้างคุณภาพ",
+    "ตรวจสอบทุกขั้นตอน",
+    "รับประกันผลงาน",
+  ];
+
+  return (
+    <section className="max-w-7xl mx-auto px-6 lg:px-10 py-20 lg:py-28">
+      <div className="grid lg:grid-cols-12 gap-14 lg:gap-20">
+        <ScrollReveal className="lg:col-span-7 lg:pr-8">
+          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary mb-3">
+            รายละเอียด
+          </p>
+          <h2 className="font-display text-2xl lg:text-3xl font-bold mb-6">
+            รายละเอียดโครงการ : <span className=" font-bold text-4xl text-primary">{project.title}</span>
+          </h2>
+          <div className="w-10 h-px bg-primary mb-4" />
+          <p className="font-body text-base lg:text-lg text-muted-foreground leading-relaxed whitespace-pre-line">
+            {project.description}
+          </p>
+        </ScrollReveal>
+
+        <ScrollReveal delay={150} className="lg:col-span-5">
+          <div className="border border-border/70 rounded-xl p-8 lg:p-10 bg-card/40 h-full">
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary mb-3">
+              ไฮไลต์
+            </p>
+            <h3 className="font-display text-xl font-bold mb-8">จุดเด่น<span className="text-primary">สำคัญ</span></h3>
+
+            <ul className="space-y-5">
+              {highlights.map((item, i) => (
+                <li key={i} className="flex items-start gap-4 group/hi">
+                  <span className="shrink-0 w-7 h-7 rounded-full border border-primary/30 flex items-center justify-center font-mono text-[10px] text-primary mt-0.5 group-hover/hi:bg-primary group-hover/hi:text-primary-foreground group-hover/hi:border-primary transition-all duration-300">
+                    {(i + 1).toString().padStart(2, "0")}
+                  </span>
+                  <span className="font-body text-sm text-foreground/80 pt-1.5 leading-snug group-hover/hi:text-foreground transition-colors">
+                    {item}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </ScrollReveal>
+      </div>
+    </section>
+  );
+};
+
+const RelatedProjectsSection = ({ related }: { related: UnifiedProject[] }) => (
+  <section className="border-t border-border/50">
+    <div className="max-w-7xl mx-auto px-6 lg:px-10 py-20 lg:py-28">
+      <ScrollReveal>
+        <div className="flex items-end justify-between mb-10">
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary mb-2">
+              ผลงานอื่นๆ
+            </p>
+            <h2 className="font-display text-3xl font-bold">โครงการที่เกี่ยวข้อง</h2>
+          </div>
+          <Link
+            href="/#portfolio"
+            className="hidden md:flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors"
+          >
+            ดูทั้งหมด <ChevronRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+      </ScrollReveal>
+
+      {related.length > 0 ? (
+        <div className="grid md:grid-cols-3 gap-5">
+          {related.map((p, i) => (
+            <ScrollReveal key={p.id} delay={i * 80}>
+              <Link
+                href={`/project/${p.id}`}
+                className="group block relative overflow-hidden rounded-sm aspect-[4/3] bg-muted"
+              >
+                <Image
+                  src={getSafeImage(p)}
+                  alt={p.title}
+                  fill
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 p-6">
+                  <p className="font-mono text-[9px] uppercase tracking-[0.25em] text-primary mb-1.5">
+                    {p.category || p.tag || "โครงการ"}
+                  </p>
+                  <h3 className="font-display text-lg font-bold text-white leading-snug">
+                    {p.title}
+                  </h3>
+                  <div className="flex items-center gap-1.5 mt-3 font-mono text-[10px] text-white/50 uppercase tracking-widest opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 transition-all duration-400">
+                    ดูโครงการ <ChevronRight className="w-3 h-3 text-primary" />
+                  </div>
+                </div>
+              </Link>
+            </ScrollReveal>
+          ))}
+        </div>
+      ) : (
+        <ScrollReveal>
+          <div className="py-16 text-center border border-dashed border-border rounded-sm">
+            <p className="font-body text-muted-foreground text-sm">
+              กำลังเพิ่มผลงานในหมวดหมู่นี้เร็วๆ นี้
+            </p>
+          </div>
+        </ScrollReveal>
+      )}
+    </div>
+  </section>
+);
+
+const ProjectCTA = () => (
+  <section className="border-t border-border/50 bg-card/30">
+    <div className="max-w-7xl mx-auto px-6 lg:px-10 py-20 lg:py-24">
+      <ScrollReveal>
+        <div className="max-w-xl mx-auto text-center">
+          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary mb-4">
+            ติดต่อเรา
+          </p>
+          <h2 className="font-display text-2xl md:text-3xl font-bold mb-3">
+            สนใจสร้างบ้านในฝัน?
+          </h2>
+          <p className="font-body text-sm text-muted-foreground mb-8 leading-relaxed">
+            ปรึกษาฟรี ไม่มีค่าใช้จ่าย เราพร้อมดูแลทุกขั้นตอน
+          </p>
+          <Link
+            href="/#contact"
+            className="inline-flex items-center gap-2.5 px-10 py-3.5 bg-primary text-primary-foreground font-display text-sm font-semibold tracking-wide hover:bg-primary/90 transition-all hover:gap-4"
+          >
+            ขอใบเสนอราคาฟรี <ChevronRight className="w-4 h-4" />
+          </Link>
+        </div>
+      </ScrollReveal>
+    </div>
+  </section>
+);
+
+const ProjectNotFound = () => (
+  <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="text-center space-y-4">
+      <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary">404</p>
+      <h1 className="font-display text-3xl font-bold text-foreground">ไม่พบโครงการ</h1>
+      <Link
+        href="/#portfolio"
+        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors font-mono"
+      >
+        <ArrowLeft className="w-4 h-4" /> กลับไปดูผลงาน
+      </Link>
+    </div>
+  </div>
+);
 
 export default ProjectDetailClient;

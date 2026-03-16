@@ -17,7 +17,7 @@ const WhyUsSection = () => {
       </div>
       <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
         <ScrollReveal>
-          <span className="section-label mb-4 text-primary-foreground/40 before:bg-primary">ข้อได้เปรียบ</span>
+          <span className="section-label mb-4 text-primary-foreground/40 before:bg-primary">Why us</span>
           <h2 className="font-display text-4xl md:text-6xl font-bold mb-16">
             ทำไมต้องเลือก<span className="text-primary">เรา</span>
           </h2>

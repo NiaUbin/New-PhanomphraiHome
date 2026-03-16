@@ -17,7 +17,7 @@ const ProcessSection = () => {
       </div>
       <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
         <ScrollReveal>
-          <span className="section-label mb-4">กระบวนการ</span>
+          <span className="section-label mb-4">process</span>
           <h2 className="font-display text-4xl md:text-6xl font-bold text-foreground mb-16">
             ขั้นตอนการ<span className="text-primary">ทำงาน</span>
           </h2>

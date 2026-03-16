@@ -1,7 +1,7 @@
 const LineButton = () => {
   return (
     <a
-      href="https://line.me/ti/p/@formabuild"
+      href="/"
       target="_blank"
       rel="noopener noreferrer"
       className="fixed bottom-6 right-6 w-14 h-14 bg-[#06C755] rounded-full flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 z-40"

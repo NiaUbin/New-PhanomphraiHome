@@ -27,7 +27,7 @@ const TestimonialsSection = () => {
         <ScrollReveal>
           <div className="flex items-end justify-between mb-12">
             <div>
-              <span className="section-label mb-4">รีวิวจากลูกค้า</span>
+              <span className="section-label mb-4">Customer reviews</span>
               <h2 className="font-display text-4xl md:text-6xl font-bold text-foreground mt-4">
                 เสียงจาก<span className="text-primary">ลูกค้า</span>
               </h2>

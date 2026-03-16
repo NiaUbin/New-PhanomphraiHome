@@ -15,7 +15,7 @@ const ServicesSection = () => {
     <section id="services" className="py-24 lg:py-32 relative">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <ScrollReveal>
-          <span className="section-label mb-4">บริการของเรา</span>
+          <span className="section-label mb-4">Our services</span>
           <h2 className="font-display text-4xl md:text-6xl font-bold text-foreground mb-4">
             สิ่งที่เรา<span className="text-primary">ทำ</span>
           </h2>

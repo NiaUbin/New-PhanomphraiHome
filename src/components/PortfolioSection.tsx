@@ -32,7 +32,7 @@ const PortfolioSection = ({ supabaseProjects = [] }: PortfolioSectionProps) => {
     <section id="portfolio" className="py-24 lg:py-32 relative bg-background">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <ScrollReveal>
-          <span className="section-label mb-4">ผลงาน</span>
+          <span className="section-label mb-4">Portfolio</span>
           <h2 className="font-display text-4xl md:text-6xl font-bold text-foreground mb-4">
             ผลงานของ<span className="text-primary">เรา</span>
           </h2>
@@ -109,7 +109,7 @@ const PortfolioSection = ({ supabaseProjects = [] }: PortfolioSectionProps) => {
               ))}
             </div>
 
-            <ScrollReveal delay={500}>
+            <ScrollReveal delay={300}>
               <div className="flex justify-center mt-16 md:mt-20">
                 <Link
                   href="/portfolio"
