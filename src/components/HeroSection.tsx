@@ -14,14 +14,18 @@ const HeroSection = () => {
   }, []);
 
   return (
-    <section className="relative h-screen min-h-[640px] flex items-center overflow-hidden">
+    <section className="relative h-screen min-h-[640px] flex items-center overflow-hidden bg-neutral-950">
 
       {/* ── Background ── */}
-      <div className="absolute inset-0">
+      <div 
+        className={`absolute inset-0 transition-all duration-[2500ms] ease-in-out ${
+          loaded ? 'opacity-100 blur-0' : 'opacity-0 blur-sm'
+        }`}
+      >
         <img
           src={heroBg}
           alt="สถาปัตยกรรมบ้านหรูสมัยใหม่"
-          className="w-full h-full object-cover scale-[1.04] animate-ken-burns"
+          className="w-full h-full object-cover animate-ken-burns"
         />
         {/* soft left-side veil */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/45 to-black/10" />

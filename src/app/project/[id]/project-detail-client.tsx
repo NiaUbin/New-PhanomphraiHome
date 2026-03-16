@@ -60,9 +60,16 @@ const ProjectDetailClient = ({
 
   if (!project) return <ProjectNotFound />;
 
-  const gallery = (project.gallery || []).filter(
-    (img: string) => typeof img === "string" && img.trim() !== ""
+  // นำรูปภาพหลัก (Main Image) มารวมไว้เป็นรูปแรกของแกลเลอรี่เสมอ
+  const mainImage = getSafeImage(project);
+  
+  // กรองรูปที่ไม่ใช่ string ว่างออก และไม่ให้ซ้ำกับรูประบุตัวตน
+  const extraGallery = (project.gallery || []).filter(
+    (img: string) => typeof img === "string" && img.trim() !== "" && img !== mainImage
   );
+  
+  // ให้แกลเลอรี่รวมรูปหลักและรูปเสริมเข้าด้วยกัน
+  const gallery = [mainImage, ...extraGallery];
 
   const openLightbox = (index: number) => {
     setLightboxIndex(index);
