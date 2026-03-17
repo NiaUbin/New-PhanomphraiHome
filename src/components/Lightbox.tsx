@@ -50,21 +50,24 @@ const Lightbox = ({ images = [], initialIndex = 0, open, onClose }: LightboxProp
   // Variants สำหรับ Framer Motion เลื่อนสไลด์ซ้าย-ขวา
   const slideVariants = {
     enter: (dir: number) => ({
-      x: dir > 0 ? 300 : -300,
+      x: dir > 0 ? 150 : -150,
       opacity: 0,
-      scale: 0.95,
+      scale: 0.85,
+      filter: "blur(12px)",
     }),
     center: {
       zIndex: 1,
       x: 0,
       opacity: 1,
       scale: 1,
+      filter: "blur(0px)",
     },
     exit: (dir: number) => ({
       zIndex: 0,
-      x: dir < 0 ? 300 : -300,
+      x: dir < 0 ? 150 : -150,
       opacity: 0,
-      scale: 0.95,
+      scale: 0.85,
+      filter: "blur(12px)",
     }),
   };
 
@@ -76,11 +79,11 @@ const Lightbox = ({ images = [], initialIndex = 0, open, onClose }: LightboxProp
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.4 }}
-          className="fixed inset-0 z-[1000] bg-zinc-950/95 backdrop-blur-xl flex items-center justify-center text-white"
+          className="fixed inset-0 z-[1000] bg-stone-900/90 backdrop-blur-xl flex items-center justify-center text-white"
         >
         {/* Decorative Background Accents */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[60vh] bg-primary/20 blur-[150px] rounded-full opacity-50" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[60vh] bg-[#8B5E3C]/25 blur-[150px] rounded-full opacity-50" />
         </div>
 
         {/* Close Button */}
@@ -98,19 +101,19 @@ const Lightbox = ({ images = [], initialIndex = 0, open, onClose }: LightboxProp
               {/* Prev Button */}
               <button
                 onClick={showPrev}
-                className="absolute left-4 md:left-8 z-[110] p-4 bg-black/20 hover:bg-black/40 border border-white/10 rounded-full backdrop-blur-md transition-all duration-300 group"
+                className="absolute left-4 md:left-8 z-[110] p-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full backdrop-blur-md transition-all duration-300 group"
                 aria-label="Previous image"
               >
-                <ChevronLeft className="w-6 h-6 text-white/70 group-hover:text-white transition-colors" />
+                <ChevronLeft className="w-6 h-6 text-white/60 group-hover:text-amber-200 transition-colors" />
               </button>
               
               {/* Next Button */}
               <button
                 onClick={showNext}
-                className="absolute right-4 md:right-8 z-[110] p-4 bg-black/20 hover:bg-black/40 border border-white/10 rounded-full backdrop-blur-md transition-all duration-300 group"
+                className="absolute right-4 md:right-8 z-[110] p-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full backdrop-blur-md transition-all duration-300 group"
                 aria-label="Next image"
               >
-                <ChevronRight className="w-6 h-6 text-white/70 group-hover:text-white transition-colors" />
+                <ChevronRight className="w-6 h-6 text-white/60 group-hover:text-amber-200 transition-colors" />
               </button>
             </>
           )}
@@ -124,9 +127,10 @@ const Lightbox = ({ images = [], initialIndex = 0, open, onClose }: LightboxProp
               animate="center"
               exit="exit"
               transition={{
-                x: { type: "spring", stiffness: 300, damping: 30 },
-                opacity: { duration: 0.2 },
-                scale: { duration: 0.4 },
+                x: { type: "spring", stiffness: 250, damping: 35 },
+                opacity: { duration: 0.5, ease: "easeInOut" },
+                scale: { duration: 0.6, ease: [0.25, 1, 0.5, 1] },
+                filter: { duration: 0.5, ease: "easeOut" }
               }}
               className="absolute flex items-center justify-center w-full max-w-6xl max-h-[85vh] px-16"
               style={{ aspectRatio: "16/9" }}
@@ -148,8 +152,9 @@ const Lightbox = ({ images = [], initialIndex = 0, open, onClose }: LightboxProp
           </AnimatePresence>
 
           {images.length > 0 && (
-            <div className="absolute bottom-6 md:bottom-10 left-1/2 -translate-x-1/2 font-mono text-xs uppercase tracking-widest text-white/50 bg-black/40 px-4 py-1.5 rounded-full border border-white/10 backdrop-blur-md">
-              <span className="text-white">{index + 1}</span> / {images.length}
+            <div className="absolute top-6 left-6 md:top-8 md:left-8 z-[110] font-mono text-xs md:text-sm uppercase tracking-widest text-white/60 bg-white/5 px-5 py-2.5 rounded-full border border-white/10 backdrop-blur-md shadow-lg flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+              ภาพที่ <span className="text-white font-bold">{index + 1}</span> / {images.length}
             </div>
           )}
         </div>

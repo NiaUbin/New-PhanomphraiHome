@@ -16,6 +16,22 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // เลื่อนไปที่ section เมื่อ hash เปลี่ยนแปลงหรือโหลดหน้าแรก
+  useEffect(() => {
+    if (isHome && typeof window !== 'undefined') {
+      const hash = window.location.hash;
+      if (hash) {
+        setTimeout(() => {
+          const id = hash.replace('#', '');
+          const element = document.getElementById(id);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+          }
+        }, 400); // ดีเลย์เล็กน้อยเพื่อให้ DOM โหลดเสร็จและ layout นิ่ง
+      }
+    }
+  }, [pathname, isHome]);
+
   const navLinks = [
     { href: isHome ? '#services' : '/#services', label: 'บริการ' },
     { href: isHome ? '#process' : '/#process', label: 'ขั้นตอน' },
@@ -26,6 +42,20 @@ const Navbar = () => {
   ];
 
   const closeMobile = () => setMobileOpen(false);
+
+  // ฟังก์ชันจัดการคลิกเมนูเพื่อสกรอลสมูทๆ ข้ามการเปลี่ยนหน้าปกติถ้าอยู่หน้า Home
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (isHome && href.startsWith('#')) {
+      e.preventDefault();
+      const targetId = href.substring(1);
+      const elem = document.getElementById(targetId);
+      if (elem) {
+        elem.scrollIntoView({ behavior: 'smooth' });
+        window.history.pushState(null, '', href);
+      }
+    }
+    setMobileOpen(false);
+  };
 
   return (
     <nav
@@ -46,12 +76,17 @@ const Navbar = () => {
             <Link 
               key={link.href} 
               href={link.href} 
+              onClick={(e) => handleNavClick(e, link.href)}
               className="relative font-mono text-sm font-medium uppercase tracking-widest text-foreground/70 hover:text-primary transition-colors duration-300 after:absolute after:bottom-[-4px] after:left-0 after:h-[1.5px] after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
             >
               {link.label}
             </Link>
           ))}
-          <Link href={isHome ? '#contact' : '/#contact'} className="btn-primary ml-4">
+          <Link 
+            href={isHome ? '#contact' : '/#contact'} 
+            onClick={(e) => handleNavClick(e, isHome ? '#contact' : '/#contact')}
+            className="btn-primary ml-4"
+          >
             <span>ขอใบเสนอราคา</span>
           </Link>
         </div>
@@ -75,13 +110,17 @@ const Navbar = () => {
             <Link 
               key={link.href} 
               href={link.href} 
-              onClick={closeMobile}
+              onClick={(e) => handleNavClick(e, link.href)}
               className="block font-mono text-sm font-medium uppercase tracking-widest text-foreground/70 hover:text-primary transition-colors"
             >
               {link.label}
             </Link>
           ))}
-          <Link href={isHome ? '#contact' : '/#contact'} onClick={closeMobile} className="btn-primary inline-block">
+          <Link 
+            href={isHome ? '#contact' : '/#contact'} 
+            onClick={(e) => handleNavClick(e, isHome ? '#contact' : '/#contact')} 
+            className="btn-primary inline-block"
+          >
             <span>ขอใบเสนอราคา</span>
           </Link>
         </div>

@@ -241,7 +241,7 @@ const ProjectGallery = ({
           <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary mb-2">
             แกลเลอรี่
           </p>
-          <h2 className="font-display text-3xl font-bold">ภาพผลงาน</h2>
+          <h2 className="font-display text-3xl font-bold text-muted-foreground">ภาพผลงาน</h2>
         </div>
         <span className="hidden md:block font-mono text-[10px] text-muted-foreground uppercase tracking-widest">
           {gallery.length} ภาพ
@@ -291,7 +291,7 @@ const ProjectContent = ({ project }: { project: UnifiedProject }) => {
           <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary mb-3">
             รายละเอียด
           </p>
-          <h2 className="font-display text-2xl lg:text-3xl font-bold mb-6">
+          <h2 className="font-display text-2xl text-muted-foreground lg:text-3xl font-bold mb-6">
             รายละเอียดโครงการ : <span className=" font-bold text-4xl text-primary">{project.title}</span>
           </h2>
           <div className="w-10 h-px bg-primary mb-4" />
@@ -305,7 +305,7 @@ const ProjectContent = ({ project }: { project: UnifiedProject }) => {
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary mb-3">
               ไฮไลต์
             </p>
-            <h3 className="font-display text-xl font-bold mb-8">จุดเด่น<span className="text-primary">สำคัญ</span></h3>
+            <h3 className="font-display text-xl text-muted-foreground font-bold mb-8">จุดเด่น<span className="text-primary">สำคัญ</span></h3>
 
             <ul className="space-y-5">
               {highlights.map((item, i) => (
@@ -335,7 +335,7 @@ const RelatedProjectsSection = ({ related }: { related: UnifiedProject[] }) => (
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary mb-2">
               ผลงานอื่นๆ
             </p>
-            <h2 className="font-display text-3xl font-bold">โครงการที่เกี่ยวข้อง</h2>
+            <h2 className="font-display text-3xl text-muted-foreground font-bold">โครงการที่เกี่ยวข้อง</h2>
           </div>
           <Link
             href="/#portfolio"

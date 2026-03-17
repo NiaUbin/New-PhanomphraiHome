@@ -1,7 +1,16 @@
+'use client';
+
 import { Facebook, Instagram, Youtube } from 'lucide-react';
 
 const Footer = () => {
-  const navLinks = ['บริการ', 'ขั้นตอน', 'ผลงาน', 'ทำไมต้องเรา', 'รีวิว', 'ติดต่อ'];
+  const navLinks = [
+    { label: 'บริการ', href: 'services' },
+    { label: 'ขั้นตอน', href: 'process' },
+    { label: 'ผลงาน', href: 'portfolio' },
+    { label: 'ทำไมต้องเรา', href: 'why-us' },
+    { label: 'รีวิว', href: 'testimonials' },
+    { label: 'ติดต่อ', href: 'contact' }
+  ];
   const serviceLinks = ['ออกแบบสถาปัตยกรรม', 'ก่อสร้างบ้านใหม่', 'ต่อเติม/ปรับปรุง', 'ตกแต่งภายใน', 'งานระบบ', 'ที่ปรึกษาโครงการ'];
 
   return (
@@ -23,10 +32,20 @@ const Footer = () => {
             <h4 className="font-mono text-xs uppercase tracking-widest text-primary mb-6">เมนู</h4>
             <ul className="space-y-3">
               {navLinks.map((link) => (
-                <li key={link}>
-                  <a href={`#${link}`} className="font-body text-sm text-primary-foreground/50 hover:text-primary transition-colors">
-                    {link}
-                  </a>
+                <li key={link.label}>
+                  <button 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const element = document.getElementById(link.href);
+                      if (element) {
+                        element.scrollIntoView({ behavior: 'smooth' });
+                        window.history.pushState(null, '', `#${link.href}`);
+                      }
+                    }}
+                    className="font-body text-sm text-primary-foreground/50 hover:text-primary transition-colors cursor-pointer text-left focus:outline-none"
+                  >
+                    {link.label}
+                  </button>
                 </li>
               ))}
             </ul>
