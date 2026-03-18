@@ -289,21 +289,47 @@ const Navbar = () => {
 
   const scrollTo = (href: string) => {
     const id = href.replace(/\/?#/, '');
-    if (isHome) {
-      const el = document.getElementById(id);
-      if (el) {
-        window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 100, behavior: 'smooth' });
-        window.history.pushState(null, '', `#${id}`);
-      }
-    }
+    
+    // Close menus immediately for responsiveness
     setOpenGroup(null);
     setMobileOpen(false);
     setMobileExpanded(null);
+
+    if (isHome) {
+      const el = document.getElementById(id);
+      if (el) {
+        // Micro-delay for a more "controlled" feel (fraction of a second)
+        setTimeout(() => {
+          const navbarHeight = 84; 
+          const elementPosition = el.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.scrollY - navbarHeight;
+
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+          });
+          
+          // Update URL hash without jump
+          window.history.pushState(null, '', `#${id}`);
+        }, 350); 
+      }
+    } else {
+      // If not on home, delay slightly then navigate
+      setTimeout(() => {
+        window.location.href = `/#${id}`;
+      }, 300);
+    }
   };
 
   const handleLink = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-    const anchor = href.startsWith('/#') ? href.slice(1) : href;
-    if (anchor.startsWith('#')) { e.preventDefault(); scrollTo(anchor); }
+    // Determine if it's an internal hash link
+    const isInternalHash = href.startsWith('#') || href.startsWith('/#');
+    
+    if (isInternalHash) {
+      e.preventDefault();
+      const anchor = href.startsWith('/#') ? href.slice(1) : href;
+      scrollTo(anchor);
+    }
   };
 
   const activeGroup = NAV_GROUPS.find((g) => g.label === openGroup);
@@ -328,7 +354,15 @@ const Navbar = () => {
         {/* Logo */}
         <Link
           href="/"
-          onClick={(e) => { if (isHome) { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); } }}
+          onClick={(e) => { 
+            if (isHome) { 
+              e.preventDefault(); 
+              // Add a slight delay for a premium feel
+              setTimeout(() => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }, 200); 
+            } 
+          }}
           className="flex flex-col leading-none"
         >
           <span className={`font-display text-2xl font-bold tracking-tight transition-colors duration-500 ${

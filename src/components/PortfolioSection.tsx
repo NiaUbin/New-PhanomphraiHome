@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { MapPin } from 'lucide-react';
 import ScrollReveal from './ScrollReveal';
@@ -27,6 +27,36 @@ const PortfolioSection = ({
   const filters = ['ทั้งหมด', ...categories];
   const [active, setActive] = useState('ทั้งหมด');
 
+  // แก้ปัญหาเมื่อกด "กลับไปหน้าผลงาน" จากหน้าโปรเจกต์แล้วไม่เลื่อนลงมาที่ส่วนผลงาน
+  useEffect(() => {
+    // ฟังก์ชันช่วยเลื่อนหน้าจอ
+    const handleScroll = () => {
+      if (window.location.hash === '#portfolio') {
+        const element = document.getElementById('portfolio');
+        if (element) {
+          const offset = 90; // ระยะห่างจากด้านบน (เผื่อ Navbar)
+          const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+          
+          window.scrollTo({
+            top: elementPosition - offset,
+            behavior: 'smooth'
+          });
+        }
+      }
+    };
+
+    // เลื่อนทันทีที่โหลดเสร็จ (ใส่ดีเลย์เล็กน้อยเพื่อให้ Component โหลดครบและ Global Loader หายไป)
+    const timeoutId = setTimeout(handleScroll, 500);
+
+    // ดักจับการเปลี่ยน hash ในกรณีที่อยู่ในหน้าเดียวกัน
+    window.addEventListener('hashchange', handleScroll);
+    
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('hashchange', handleScroll);
+    };
+  }, []);
+
   // กรองข้อมูลหมวดหมู่
   const filtered = active === 'ทั้งหมด' 
     ? supabaseProjects 
@@ -41,7 +71,7 @@ const PortfolioSection = ({
             ผลงานของ<span className="text-primary">เรา</span>
           </h2>
           <p className="font-body text-muted-foreground max-w-xl mb-10">
-            ตัวอย่างโครงการที่เราภาคภูมิใจ จากบ้านเดี่ยวไปจนถึงคอนโดมิเนียม (ข้อมูลสดจาก Supabase)
+            ตัวอย่างโครงการที่เราภาคภูมิใจ จากบ้านเดี่ยวไปจนถึงคอนโดมิเนียม
           </p>
         </ScrollReveal>
 
