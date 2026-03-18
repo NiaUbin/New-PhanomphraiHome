@@ -13,21 +13,28 @@ const WhyUsSection = () => {
   return (
     <section
       id="why-us"
-      className="py-24 lg:py-32 text-primary-foreground relative overflow-hidden bg-fixed bg-cover bg-center"
-      style={{
-        backgroundImage: 'url("https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2670&auto=format&fit=crop")'
-      }}
+      className="py-12 md:py-24 lg:py-32 text-primary-foreground relative"
     >
-      {/* Dark overlay for readability */}
-      <div className="absolute inset-0 bg-neutral-950/85 z-0" />
+      {/* Optimized Fixed Background Layer */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none" style={{ clipPath: 'inset(0)' }}>
+        <div 
+          className="fixed inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ 
+            backgroundImage: 'url("https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2670&auto=format&fit=crop")',
+            transform: 'translateZ(0)' // HW acceleration
+          }}
+        />
+        {/* Dark overlay for readability */}
+        <div className="absolute inset-0 bg-neutral-950/85" />
+      </div>
 
-      <div className="absolute top-0 right-0 font-display text-[16rem] font-bold text-primary-foreground/[0.08] leading-none pointer-events-none select-none z-0">
+      <div className="absolute top-10 right-1/2 translate-x-1/2 md:translate-x-0 md:top-0 md:right-0 font-display text-[6rem] md:text-[12rem] lg:text-[16rem] font-bold text-primary-foreground/[0.04] leading-none pointer-events-none select-none z-0">
         WHY
       </div>
       <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
-        <ScrollReveal>
-          <span className="section-label mb-4 text-primary-foreground/40 before:bg-primary">Why us</span>
-          <h2 className="font-display text-4xl md:text-6xl font-bold mb-16">
+        <ScrollReveal className="flex flex-col items-center md:items-start text-center md:text-left">
+          <span className="section-label mb-4 text-primary-foreground/40 before:bg-primary after:bg-primary md:after:hidden">Why us</span>
+          <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-10 md:mb-16">
             ทำไมต้องเลือก<span className="text-primary">เรา</span>
           </h2>
         </ScrollReveal>
@@ -39,8 +46,8 @@ const WhyUsSection = () => {
               <ScrollReveal key={i} delay={i * 150}>
                 <div className="text-center group">
                   <Icon className="w-10 h-10 text-primary mx-auto mb-6" strokeWidth={1.5} />
-                  <div className="font-display text-4xl font-bold text-primary mb-3">{f.stat}</div>
-                  <h3 className="font-display text-xl font-semibold mb-3">{f.title}</h3>
+                  <div className="font-display text-4xl md:text-5xl font-bold text-primary mb-2 md:mb-3">{f.stat}</div>
+                  <h3 className="font-display text-lg md:text-xl font-semibold mb-3">{f.title}</h3>
                   <p className="font-body text-sm text-primary-foreground/50 leading-relaxed">{f.desc}</p>
                 </div>
               </ScrollReveal>
@@ -67,8 +74,8 @@ const WhyUsSection = () => {
               {/* Left Column: Description & Keywords */}
               <div className="lg:sticky lg:top-32">
                 <p className="text-xs tracking-widest text-primary/80 mb-3 uppercase font-mono">รายละเอียด</p>
-                <h3 className="font-display text-3xl md:text-4xl lg:text-[2.75rem] font-bold mb-8 text-primary-foreground leading-[1.2]">
-                  บริษัท<span className="text-primary">รับสร้างบ้าน</span> : <br/>Phanomphrai Construction
+                <h3 className="font-display text-2xl md:text-4xl lg:text-[2.75rem] font-bold mb-6 md:mb-8 text-primary-foreground leading-[1.2]">
+                  บริษัท<span className="text-primary">รับสร้างบ้าน</span> : <br className="hidden md:block" />Phanomphrai Construction
                 </h3>
                 <div className="w-16 h-1 bg-primary/80 mb-8 rounded-full" />
                 <p className="font-body text-base md:text-lg text-primary-foreground/70 leading-loose">
@@ -95,7 +102,7 @@ const WhyUsSection = () => {
               </div>
 
               {/* Right Column: Highlights Card */}
-              <div className="relative rounded-[2rem] border border-primary-foreground/10 bg-primary-foreground/[0.02] p-8 md:p-12 lg:p-14 backdrop-blur-md shadow-2xl">
+              <div className="relative rounded-[1.5rem] md:rounded-[2rem] border border-primary-foreground/10 bg-primary-foreground/[0.02] p-8 md:p-12 lg:p-14 backdrop-blur-md shadow-2xl">
                 {/* Background Glow inside card */}
                 <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[100px] -z-10 rounded-full pointer-events-none" />
                 <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary/5 blur-[80px] -z-10 rounded-full pointer-events-none" />
@@ -128,15 +135,15 @@ const WhyUsSection = () => {
                       desc: 'ให้คำปรึกษาและ ตีราคาสร้างบ้านฟรี โปร่งใส เพื่อให้ได้บ้านตรงใจในงบประมาณที่คุณกำหนดได้ คุ้มค่าทุกตารางเมตร' 
                     }
                   ].map((item, idx) => (
-                    <div key={idx} className="flex gap-4 md:gap-5 items-start">
-                      <div className="flex-shrink-0 mt-1 w-10 h-10 md:w-11 md:h-11 rounded-full border border-primary/40 text-primary flex items-center justify-center font-mono text-sm">
+                    <div key={idx} className="flex gap-3 md:gap-5 items-start">
+                      <div className="flex-shrink-0 mt-1 w-8 h-8 md:w-11 md:h-11 rounded-full border border-primary/40 text-primary flex items-center justify-center font-mono text-xs md:text-sm">
                         {item.num}
                       </div>
-                      <div>
-                        <h5 className="font-display font-semibold text-primary-foreground text-base md:text-lg mb-2 flex flex-col md:block">
+                      <div className="flex-1">
+                        <h5 className="font-display font-semibold text-primary-foreground text-base md:text-lg mb-1 md:mb-2">
                           {item.title} <span className="hidden md:inline text-primary-foreground/30 ml-1">:</span>
                         </h5>
-                        <p className="font-body text-sm md:text-base text-primary-foreground/60 leading-relaxed">
+                        <p className="font-body text-xs md:text-base text-primary-foreground/60 leading-relaxed">
                           {item.desc}
                         </p>
                       </div>

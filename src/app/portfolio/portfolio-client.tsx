@@ -9,8 +9,8 @@ import Footer from '@/components/Footer';
 import CustomCursor from '@/components/CustomCursor';
 import ScrollProgress from '@/components/ScrollProgress';
 import BackToTop from '@/components/BackToTop';
-import { filters } from '@/data/projects';
 import { supabase } from '@/utils/supabase';
+import { categoryService } from '@/utils/portfolioService';
 
 interface SupabaseProject {
   id: string | number;
@@ -26,22 +26,33 @@ interface SupabaseProject {
 
 const PortfolioClient = () => {
   const [projects, setProjects] = useState<SupabaseProject[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
   const [active, setActive] = useState('ทั้งหมด');
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetchProjects() {
-      const { data, error } = await supabase
-        .from('projects')
-        .select('*')
-        .order('created_at', { ascending: false });
+  const filters = ['ทั้งหมด', ...categories];
 
-      if (!error && data) {
-        setProjects(data);
+  useEffect(() => {
+    async function fetchData() {
+      const [projectsResponse, categoriesResponse] = await Promise.all([
+        supabase
+          .from('projects')
+          .select('*')
+          .order('created_at', { ascending: false }),
+        categoryService.getAll().catch(() => [])
+      ]);
+
+      if (!projectsResponse.error && projectsResponse.data) {
+        setProjects(projectsResponse.data);
       }
+      
+      if (Array.isArray(categoriesResponse)) {
+        setCategories(categoriesResponse.map(c => c.name));
+      }
+
       setLoading(false);
     }
-    fetchProjects();
+    fetchData();
   }, []);
 
   const filtered = active === 'ทั้งหมด' 
@@ -70,42 +81,15 @@ const PortfolioClient = () => {
             transition={{ duration: 0.7 }}
           >
             <span className="section-label mb-4">Portfolio</span>
-            <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-bold text-foreground mb-6">
+            <h1 className="font-display text-5xl md:text-7xl lg:text-6xl font-bold text-foreground mb-6">
               ผลงาน<span className="text-primary">ทั้งหมด</span>
             </h1>
             <p className="font-body text-lg text-muted-foreground max-w-2xl">
               รวมผลงานการออกแบบและก่อสร้างที่เราภาคภูมิใจ ทุกโครงการสร้างด้วยมาตรฐานสูงสุด
-              และความใส่ใจในทุกรายละเอียด (ข้อมูลจาก Supabase)
+              และความใส่ใจในทุกรายละเอียด
             </p>
           </motion.div>
         </div>
-
-        {/* Stats bar */}
-        {!loading && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="max-w-7xl mx-auto px-6 lg:px-8 mb-16"
-          >
-            <div className="flex flex-wrap gap-8 border-y border-border py-6">
-              <div className="flex items-baseline gap-2">
-                <span className="font-display text-3xl font-bold text-primary">{projects.length}</span>
-                <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground">โครงการทั้งหมด</span>
-              </div>
-              {filters.slice(1).map((f) => {
-                const count = projects.filter((p) => (p.category || p.tag) === f).length;
-                if (count === 0) return null;
-                return (
-                  <div key={f} className="flex items-baseline gap-2">
-                    <span className="font-display text-3xl font-bold text-foreground">{count}</span>
-                    <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground">{f}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </motion.div>
-        )}
 
         {/* Filter tabs */}
         <motion.div

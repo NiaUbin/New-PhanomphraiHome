@@ -4,7 +4,6 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { MapPin } from 'lucide-react';
 import ScrollReveal from './ScrollReveal';
-import { filters } from '@/data/projects';
 
 interface SupabaseProject {
   id: string | number;
@@ -18,9 +17,14 @@ interface SupabaseProject {
 
 interface PortfolioSectionProps {
   supabaseProjects: SupabaseProject[];
+  categories?: string[];
 }
 
-const PortfolioSection = ({ supabaseProjects = [] }: PortfolioSectionProps) => {
+const PortfolioSection = ({ 
+  supabaseProjects = [], 
+  categories = [] 
+}: PortfolioSectionProps) => {
+  const filters = ['ทั้งหมด', ...categories];
   const [active, setActive] = useState('ทั้งหมด');
 
   // กรองข้อมูลหมวดหมู่

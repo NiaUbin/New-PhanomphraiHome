@@ -12,23 +12,30 @@ import ScrollProgress from "@/components/ScrollProgress";
 import BackToTop from "@/components/BackToTop";
 import LineButton from "@/components/LineButton";
 import { supabase } from '@/utils/supabase';
+import { categoryService } from '@/utils/portfolioService';
 
 // ฟังก์ชันดึงข้อมูลจาก Supabase
-async function getProjects() {
-  const { data, error } = await supabase
-    .from('projects')
-    .select('*')
-    .order('created_at', { ascending: false });
+async function getHomePageData() {
+  const [projectsResponse, categoriesResponse] = await Promise.all([
+    supabase
+      .from('projects')
+      .select('*')
+      .order('created_at', { ascending: false }),
+    categoryService.getAll().catch(() => [])
+  ]);
 
-  if (error) {
-    console.error('เกิดข้อผิดพลาดในการดึงข้อมูล:', error);
-    return [];
+  if (projectsResponse.error) {
+    console.error('เกิดข้อผิดพลาดในการดึงข้อมูลโครงการ:', projectsResponse.error);
   }
-  return data;
+
+  return {
+    projects: projectsResponse.data || [],
+    categories: categoriesResponse || []
+  };
 }
 
 export default async function Home() {
-  const projectsFromSupabase = await getProjects();
+  const { projects: projectsFromSupabase, categories } = await getHomePageData();
 
   return (
     <>
@@ -41,7 +48,10 @@ export default async function Home() {
         <ProcessSection />
         
         {/* ใช้ PortfolioSection รูปแบบเดิมที่ดึงข้อมูลจาก Supabase */}
-        <PortfolioSection supabaseProjects={projectsFromSupabase} />
+        <PortfolioSection 
+          supabaseProjects={projectsFromSupabase} 
+          categories={categories.map(c => c.name)} 
+        />
         
         <WhyUsSection />
         <TestimonialsSection />

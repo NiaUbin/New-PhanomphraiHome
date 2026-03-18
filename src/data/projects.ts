@@ -114,4 +114,4 @@ export const projects: Project[] = [
   },
 ];
 
-export const filters = ['ทั้งหมด', 'บ้านใหม่', 'ต่อเติม', 'รีโนเวท', 'คอนโด'];
+// export const filters = ['ทั้งหมด', 'บ้านใหม่', 'ต่อเติม', 'รีโนเวท', 'คอนโด'];
