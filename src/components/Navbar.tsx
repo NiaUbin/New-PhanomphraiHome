@@ -50,8 +50,18 @@ const Navbar = () => {
       const targetId = href.substring(1);
       const elem = document.getElementById(targetId);
       if (elem) {
-        elem.scrollIntoView({ behavior: 'smooth' });
-        window.history.pushState(null, '', href);
+        // ดีเลย์เล็กน้อยก่อนเริ่มเลื่อน
+        setTimeout(() => {
+          const navbarHeight = 80; // ความสูง navbar
+          const elementPosition = elem.getBoundingClientRect().top + window.scrollY;
+          const offsetPosition = elementPosition - navbarHeight - 20; // offset เพิ่ม 20px
+
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth',
+          });
+          window.history.pushState(null, '', href);
+        }, 10); // ดีเลย์ 10ms
       }
     }
     setMobileOpen(false);
@@ -66,7 +76,16 @@ const Navbar = () => {
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-8 flex items-center justify-between h-20">
-        <Link href="/" className="font-display text-2xl font-bold tracking-wider text-foreground">
+        <Link 
+          href="/" 
+          onClick={(e) => {
+            if (isHome) {
+              e.preventDefault();
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+          }}
+          className="font-display text-2xl font-bold tracking-wider text-foreground"
+        >
           PHANOM<span className="text-primary">PHRAI PK</span>
         </Link>
 

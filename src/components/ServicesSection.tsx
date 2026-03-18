@@ -12,7 +12,7 @@ const services = [
 
 const ServicesSection = () => {
   return (
-    <section id="services" className="py-24 lg:py-32 relative">
+    <section id="services" className="pt-8 pb-24 lg:pt-8 lg:pb-32 relative">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <ScrollReveal>
           <span className="section-label mb-4">Our services</span>

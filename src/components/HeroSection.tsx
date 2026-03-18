@@ -25,7 +25,7 @@ const HeroSection = () => {
         <img
           src={heroBg}
           alt="สถาปัตยกรรมบ้านหรูสมัยใหม่"
-          className="w-full h-full object-cover animate-ken-burns"
+          className="w-full h-full object-cover"
         />
         {/* soft left-side veil */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/45 to-black/10" />

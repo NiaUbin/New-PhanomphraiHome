@@ -191,26 +191,34 @@ const ProjectHero = ({ project, onImageClick }: { project: UnifiedProject; onIma
 };
 
 const ProjectStatsBar = ({ project }: { project: UnifiedProject }) => {
-  const stats = [
-    { Icon: CalendarDays, label: "ปีที่แล้วเสร็จ", value: project.year || "2024" },
-    { Icon: Maximize2, label: "พื้นที่", value: project.area || "—" },
-    { Icon: BedDouble, label: "ห้องนอน", value: project.bedroom || "3" },
-    { Icon: ShowerHead, label: "ห้องน้ำ", value: project.bathroom || "2" },
-    { Icon: Hourglass, label: "ระยะเวลา", value: project.duration || "8 เดือน" },
-    { Icon: LocateFixed, label: "สถานที่", value: project.location || "กรุงเทพฯ" },
+  const statsConfig = [
+    { Icon: CalendarDays, label: "ปีที่เสร็จ", value: project.year },
+    { Icon: Maximize2, label: "พื้นที่", value: project.area },
+    { Icon: BedDouble, label: "ห้องนอน", value: project.bedroom },
+    { Icon: ShowerHead, label: "ห้องน้ำ", value: project.bathroom },
+    { Icon: Hourglass, label: "ระยะเวลา", value: project.duration },
+    { Icon: LocateFixed, label: "สถานที่", value: project.location },
   ];
 
+  // กรองเอาเฉพาะที่มีค่าจริง ๆ (ไม่ว่าง, ไม่ใช่ undefined/null)
+  const activeStats = statsConfig.filter(
+    (s) => s.value && s.value.trim() !== "" && s.value !== "—"
+  );
+
+  // ถ้าไม่มีการระบุ stats เลย ไม่ต้องแสดง Bar นี้
+  if (activeStats.length === 0) return null;
+
   return (
-    <div className="border-y border-border bg-card">
+    <div className="border-y border-border bg-card/50">
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-10 md:py-14">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-x-8 gap-y-10">
-          {stats.map((item) => (
-            <div key={item.label} className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-10 md:gap-x-14 lg:gap-x-20">
+          {activeStats.map((item) => (
+            <div key={item.label} className="flex items-center gap-4 min-w-[120px]">
               <div className="w-11 h-11 bg-primary/10 flex items-center justify-center rounded-xl shrink-0">
                 <item.Icon className="w-5 h-5 text-primary" />
               </div>
               <div className="min-w-0">
-                <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5 truncate">
+                <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-1 truncate">
                   {item.label}
                 </p>
                 <p className="font-body text-sm font-semibold text-foreground truncate">
@@ -267,7 +275,7 @@ const ProjectGallery = ({
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-500" />
             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-400">
               <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-white border border-white/50 px-4 py-2">
-                ขยาย
+                ดูภาพ
               </span>
             </div>
           </button>
@@ -285,7 +293,7 @@ const ProjectContent = ({ project }: { project: UnifiedProject }) => {
   ];
 
   return (
-    <section className="max-w-7xl mx-auto px-6 lg:px-10 py-20 lg:py-28">
+    <section className="max-w-7xl mx-auto px-6 lg:px-10 py-5 lg:py-5">
       <div className="grid lg:grid-cols-12 gap-14 lg:gap-20">
         <ScrollReveal className="lg:col-span-7 lg:pr-8">
           <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary mb-3">

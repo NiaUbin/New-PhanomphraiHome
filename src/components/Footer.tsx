@@ -65,13 +65,13 @@ const Footer = () => {
 
           {/* Social */}
           <div>
-            <h4 className="font-mono text-xs uppercase tracking-widest text-primary mb-6">ติดตามเรา</h4>
+            <h4 className="font-mono text-xs uppercase tracking-widest text-primary mb-6">ติดต่อเรา</h4>
             <div className="flex gap-4">
               {[Facebook, Instagram, Youtube].map((Icon, i) => (
                 <a
                   key={i}
                   href="#"
-                  className="w-10 h-10 border border-primary-foreground/20 flex items-center justify-center hover:border-primary hover:bg-primary/10 transition-all duration-300"
+                  className="w-10 h-10 rounded-full border border-primary-foreground/20 flex items-center justify-center hover:border-primary hover:bg-primary/10 transition-all duration-300"
                   aria-label={`Social ${i}`}
                 >
                   <Icon className="w-4 h-4 text-primary-foreground/60" />
@@ -80,21 +80,50 @@ const Footer = () => {
               {/* LINE */}
               <a
                 href="#"
-                className="w-10 h-10 border border-primary-foreground/20 flex items-center justify-center hover:border-primary hover:bg-primary/10 transition-all duration-300"
+                className="w-10 h-10 rounded-full border border-primary-foreground/20 flex items-center justify-center hover:border-primary hover:bg-primary/10 transition-all duration-300"
                 aria-label="LINE"
               >
                 <span className="font-mono text-xs font-bold text-primary-foreground/60">L</span>
               </a>
             </div>
+            
+            <div className="mt-8 space-y-2">
+              <p className="font-body text-sm text-primary-foreground/50">
+                <strong className="text-primary-foreground/80">โทร:</strong> 081-XXX-XXXX
+              </p>
+              <p className="font-body text-sm text-primary-foreground/50">
+                <strong className="text-primary-foreground/80">อีเมล:</strong> contact@phanomphrai.com
+              </p>
+            </div>
           </div>
         </div>
 
-        <div className="border-t border-primary-foreground/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+        {/* --- SEO Keyword Footer Section --- */}
+        <div className="border-t border-primary-foreground/10 pt-10 pb-6">
+          <h5 className="font-display text-base font-semibold text-primary-foreground/80 mb-4">
+            ศูนย์รวมบริการรับเหมาก่อสร้างและรับสร้างบ้านแบบครบวงจร ที่ดีที่สุด
+          </h5>
+          <p className="font-body text-[11px] sm:text-xs text-primary-foreground/40 leading-loose text-justify md:text-left">
+            <strong>บริษัท พนมไพร คอนสตรัคชั่น (Phanomphrai Construction)</strong> บริการ <strong>รับสร้างบ้านหน้าแคบ รับสร้างบ้าน 2 ชั้น รับสร้างบ้านโมเดิร์น (Modern) รับสร้างบ้านหรู</strong> และ <strong>ออกแบบบ้านเดี่ยว</strong> ทั่วประเทศ ดำเนินงานโดย <strong>ผู้รับเหมามืออาชีพ ไม่ทิ้งงาน</strong> มีวิศวกรควบคุมงานทุกขั้นตอน ใช้วัสดุก่อสร้างเกรดพรีเมียม มาตรฐาน มอก. พร้อมบริการ <strong>รับเหมาต่อเติมบ้าน ต่อเติมห้องครัว ต่อเติมโรงรถ งานรีโนเวทบ้าน (Renovate)</strong> และ <strong>ออกแบบตกแต่งภายใน (Interior Design)</strong> เรายินดี <strong>ประเมินราคาก่อสร้าง ตีราคาสร้างบ้านฟรี คุมงบไม่บานปลาย สร้างบ้านราคาถูก</strong> ได้บ้านสวย ทนทาน โครงสร้างปลอดภัย ส่งมอบตรงเวลา ให้คุณได้บ้านในฝันอย่างแท้จริง
+          </p>
+          <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2">
+            {[ 
+              'ผู้รับเหมาก่อสร้าง', 'บริษัทรับสร้างบ้าน', 'สร้างบ้านโมเดิร์น', 'ช่างรับเหมา', 
+              'รับเหมาต่อเติม', 'ประเมินราคาสร้างบ้าน', 'แบบบ้าน 2 ชั้น', 'ผู้รับเหมาไม่ทิ้งงาน', 'ต่อเติมหลังคาหน้าบ้าน'
+            ].map(keyword => (
+              <span key={keyword} className="font-mono text-[10px] text-primary-foreground/30 hover:text-primary transition-colors cursor-default">
+                #{keyword}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="border-t border-primary-foreground/10 pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="font-body text-xs text-primary-foreground/30">
-            © 2025 PHANOMPHRAI. All rights reserved.
+            © 2026 PHANOMPHRAI CONSTRUCTION. All rights reserved.
           </p>
           <p className="font-mono text-[10px] uppercase tracking-widest text-primary-foreground/20">
-            ใบอนุญาตก่อสร้างเลขที่ กทม. XXXX/XXXX
+            สร้างบ้านด้วยความใส่ใจ ในระดับมาสเตอร์พีซ
           </p>
         </div>
       </div>

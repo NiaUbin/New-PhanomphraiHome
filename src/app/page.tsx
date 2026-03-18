@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
+import TestDescript from "@/components/TestDescript";
 import ServicesSection from "@/components/ServicesSection";
 import ProcessSection from "@/components/ProcessSection";
 import PortfolioSection from "@/components/PortfolioSection";
@@ -35,6 +36,7 @@ export default async function Home() {
       <Navbar />
       <main>
         <HeroSection />
+        <TestDescript />
         <ServicesSection />
         <ProcessSection />
         

@@ -5,8 +5,8 @@ export interface Project {
   title: string
   description: string
   category: string
-  area: string
-  price: string
+  area?: string
+  price?: string
   image_url: string // เปลี่ยนจาก img เป็น image_url ตามที่คุณต้องการ
   location?: string
   tag?: string;
