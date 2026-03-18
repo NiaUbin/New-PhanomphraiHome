@@ -58,15 +58,15 @@ export default function PortfolioAdminPage() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this project?")) return
+    if (!confirm("คุณแน่ใจหรือไม่ที่จะลบผลงานนี้?")) return
     
     try {
       await portfolioService.delete(id)
-      toast.success("Project deleted successfully")
+      toast.success("ลบโครงการสำเร็จ")
       fetchProjects()
     } catch (error) {
       console.error(error)
-      toast.error("Failed to delete project")
+      toast.error("ไม่สามารถลบผลงานได้")
     }
   }
 
@@ -80,7 +80,7 @@ export default function PortfolioAdminPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-3xl font-display font-bold text-foreground">จัดการผลงาน</h2>
-          <p className="text-muted-foreground">Manage your portfolio items and showcase your work.</p>
+          <p className="text-muted-foreground">จัดการรายการผลงานและโครงการต่างๆ ของคุณ</p>
         </div>
         <Button onClick={handleCreateNew} className="btn-primary flex items-center gap-2">
           <Plus className="size-4" />

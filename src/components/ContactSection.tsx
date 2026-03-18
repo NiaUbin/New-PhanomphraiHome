@@ -124,8 +124,8 @@ const ContactSection = () => {
             <div className="space-y-8">
               {[
                 { icon: Phone, label: 'โทรศัพท์', value: '092-262-0227' },
-                { icon: Mail, label: 'อีเมล', value: 'เอามาใส่ตรงนี้ อย่าลืม' },
-                { icon: MapPin, label: 'LINE ID', value: 'เอามาใส่ตรงนี้ อย่าลืม' },
+                { icon: Mail, label: 'อีเมล', value: 'contact@phanomphrai.com' },
+                { icon: MapPin, label: 'LINE ID', value: '@phanomphrai' },
                 { icon: Clock, label: 'เวลาทำการ', value: 'จันทร์ - เสาร์ 08:00 - 18:00' },
               ].map((info, i) => {
                 const Icon = info.icon;

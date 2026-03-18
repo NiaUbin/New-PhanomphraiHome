@@ -7,6 +7,7 @@ import ScrollReveal from './ScrollReveal';
 
 interface SupabaseProject {
   id: string | number;
+  slug?: string;
   title: string;
   image_url?: string | null;
   img?: string | null;
@@ -101,7 +102,7 @@ const PortfolioSection = ({
               {filtered.map((project, i) => (
                 <ScrollReveal key={project.id + active} delay={i * 100}>
                   <Link
-                    href={`/project/${project.id}`}
+                    href={`/project/${project.slug || project.id}`}
                     className={`group relative overflow-hidden break-inside-avoid block ${
                       i % 3 === 0 ? 'aspect-[3/4]' : i % 3 === 1 ? 'aspect-[4/3]' : 'aspect-square'
                     }`}
@@ -134,7 +135,7 @@ const PortfolioSection = ({
                         </h3>
                         <div className="flex items-center gap-2 text-white/70 font-body text-xs mb-6 px-1">
                           <MapPin className="w-3 h-3 text-primary" />
-                          {project.location || 'Bangkok, Thailand'}
+                          {project.location || 'กรุงเทพมหานคร'}
                         </div>
                       </div>
                     </div>

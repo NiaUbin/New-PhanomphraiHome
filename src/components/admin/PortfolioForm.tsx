@@ -34,6 +34,7 @@ const formSchema = z.object({
   area: z.string().optional(),
   price: z.string().optional(),
   image_url: z.string().min(1, "กรุณาอัปโหลดรูปภาพ"),
+  slug: z.string().optional(),
   location: z.string().optional(),
   gallery: z.array(z.string()).optional(),
   highlights: z.array(z.string()).optional(),
@@ -52,6 +53,16 @@ export function PortfolioForm({ initialData, onSuccess }: PortfolioFormProps) {
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [categories, setCategories] = useState<Category[]>([])
+  const [isSlugEdited, setIsSlugEdited] = useState(false)
+
+  const slugify = (text: string) => {
+    return text
+      .toLowerCase()
+      .trim()
+      .replace(/[^\u0E00-\u0E7Fa-zA-Z0-9\s-]/g, '') // Keep Thai, English, Numbers
+      .replace(/\s+/g, '-') // Replace spaces with -
+      .replace(/-+/g, '-'); // Replace multiple - with single -
+  }
 
   useEffect(() => {
     const fetchCats = async () => {
@@ -72,6 +83,7 @@ export function PortfolioForm({ initialData, onSuccess }: PortfolioFormProps) {
     area: initialData?.area || "",
     price: initialData?.price || "",
     image_url: initialData?.image_url || "",
+    slug: initialData?.slug || "",
     location: initialData?.location || "",
     gallery: initialData?.gallery || [],
     highlights: initialData?.highlights || [],
@@ -89,16 +101,32 @@ export function PortfolioForm({ initialData, onSuccess }: PortfolioFormProps) {
   // Update form when initialData changes (e.g. when opening a different project to edit)
   useEffect(() => {
     form.reset(defaultValues)
+    setIsSlugEdited(!!initialData?.slug)
   }, [initialData, form, defaultValues])
+
+  // Watch title for auto-slug
+  const watchTitle = form.watch("title")
+  useEffect(() => {
+    if (!isSlugEdited && watchTitle && !initialData?.id) {
+      form.setValue("slug", slugify(watchTitle))
+    }
+  }, [watchTitle, isSlugEdited, form, initialData])
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setLoading(true)
+      
+      // Ensure slug exists
+      const finalValues = {
+        ...values,
+        slug: values.slug || slugify(values.title || "")
+      }
+
       if (initialData?.id) {
-        await portfolioService.update(initialData.id, values)
+        await portfolioService.update(initialData.id, finalValues)
         toast.success("อัปเดตข้อมูลสำเร็จ")
       } else {
-        await portfolioService.create(values as Project)
+        await portfolioService.create(finalValues as Project)
         toast.success("บันทึกข้อมูลสำเร็จ")
       }
       onSuccess()
@@ -268,6 +296,36 @@ export function PortfolioForm({ initialData, onSuccess }: PortfolioFormProps) {
                       ))}
                     </SelectContent>
                   </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 gap-6">
+            <FormField
+              control={form.control}
+              name="slug"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    <Sparkles className="size-3.5 text-muted-foreground" />
+                    Slug ID ผลงาน (ภาษาอังกฤษ หรือ ภาษาไทย ก็ได้ สำหรับ URL โครงการ)
+                  </FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="เช่นบ้านสองชั้นริมหาด หรือ baan-song-chan" 
+                      className="bg-background" 
+                      {...field} 
+                      onChange={(e) => {
+                        field.onChange(e)
+                        setIsSlugEdited(true)
+                      }}
+                    />
+                  </FormControl>
+                  <p className="text-[10px] text-muted-foreground">
+                    * ใช้สำหรับลิงก์หน้าผลงาน เช่น: phanomphrai.com/project/<strong>{field.value || "slug-name"}</strong>
+                  </p>
                   <FormMessage />
                 </FormItem>
               )}

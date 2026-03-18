@@ -192,12 +192,12 @@ const ProjectHero = ({ project, onImageClick }: { project: UnifiedProject; onIma
 
 const ProjectStatsBar = ({ project }: { project: UnifiedProject }) => {
   const statsConfig = [
-    { Icon: CalendarDays, label: "ปีที่เสร็จ", value: project.year },
-    { Icon: Maximize2, label: "พื้นที่", value: project.area },
     { Icon: BedDouble, label: "ห้องนอน", value: project.bedroom },
     { Icon: ShowerHead, label: "ห้องน้ำ", value: project.bathroom },
-    { Icon: Hourglass, label: "ระยะเวลา", value: project.duration },
+    { Icon: Maximize2, label: "พื้นที่", value: project.area },
     { Icon: LocateFixed, label: "สถานที่", value: project.location },
+    { Icon: CalendarDays, label: "ปีที่เสร็จ", value: project.year },
+    { Icon: Hourglass, label: "ระยะเวลา", value: project.duration },
   ];
 
   // กรองเอาเฉพาะที่มีค่าจริง ๆ (ไม่ว่าง, ไม่ใช่ undefined/null)
@@ -359,7 +359,7 @@ const RelatedProjectsSection = ({ related }: { related: UnifiedProject[] }) => (
           {related.map((p, i) => (
             <ScrollReveal key={p.id} delay={i * 80}>
               <Link
-                href={`/project/${p.id}`}
+                href={`/project/${p.slug || p.id}`}
                 className="group block relative overflow-hidden rounded-sm aspect-[4/3] bg-muted"
               >
                 <Image

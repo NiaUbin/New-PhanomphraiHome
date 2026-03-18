@@ -14,6 +14,7 @@ import { categoryService } from '@/utils/portfolioService';
 
 interface SupabaseProject {
   id: string | number;
+  slug?: string;
   title: string;
   image_url?: string | null;
   img?: string | null;
@@ -141,16 +142,16 @@ const PortfolioClient = () => {
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
               >
                 {filtered.map((project, i) => (
-                  <motion.div
-                    key={project.id}
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: i * 0.08 }}
-                  >
-                    <Link
-                      href={`/project/${project.id}`}
-                      className="group block relative overflow-hidden bg-card border border-border/50 hover:border-primary/30 transition-colors"
+                    <motion.div
+                      key={project.id}
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: i * 0.08 }}
                     >
+                      <Link
+                        href={`/project/${project.slug || project.id}`}
+                        className="group block relative overflow-hidden bg-card border border-border/50 hover:border-primary/30 transition-colors"
+                      >
                       {/* Image */}
                       <div className={`relative overflow-hidden ${i % 4 === 0 ? 'aspect-[3/4]' : 'aspect-[4/3]'}`}>
                         <img

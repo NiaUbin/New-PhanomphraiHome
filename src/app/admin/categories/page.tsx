@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Plus, Trash2, Loader2, Edit2, Check, X } from "lucide-react"
+import { Plus, Trash2, Loader2, Edit2, Check, X, ArrowUp, ArrowDown } from "lucide-react"
 import { categoryService, Category } from "@/utils/portfolioService"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -53,15 +53,64 @@ export default function CategoryAdminPage() {
 
     try {
       setIsAdding(true)
-      await categoryService.create(newCategory.trim())
+      const maxPosition = categories.length > 0 
+        ? Math.max(...categories.map(c => c.position)) 
+        : 0
+      await categoryService.create(newCategory.trim(), maxPosition + 1)
       toast.success("เพิ่มหมวดหมู่สำเร็จ")
       setNewCategory("")
       fetchCategories()
     } catch (error) {
       console.error("Create error:", error)
-      toast.error("เกิดข้อผิดพลาดในการสร้างโหมดหมู่")
+      toast.error("เกิดข้อผิดพลาดในการสร้างหมวดหมู่")
     } finally {
       setIsAdding(false)
+    }
+  }
+
+  const handleMoveUp = async (index: number) => {
+    if (index === 0) return
+    const currentList = [...categories]
+    const current = currentList[index]
+    const above = currentList[index - 1]
+
+    // Swap positions
+    const tempPos = current.position
+    current.position = above.position
+    above.position = tempPos
+
+    try {
+      await Promise.all([
+        categoryService.updatePosition(current.id, current.position),
+        categoryService.updatePosition(above.id, above.position)
+      ])
+      fetchCategories()
+    } catch (error) {
+      console.error(error)
+      toast.error("ไม่สามารถเปลี่ยนลำดับได้")
+    }
+  }
+
+  const handleMoveDown = async (index: number) => {
+    if (index === categories.length - 1) return
+    const currentList = [...categories]
+    const current = currentList[index]
+    const below = currentList[index + 1]
+
+    // Swap positions
+    const tempPos = current.position
+    current.position = below.position
+    below.position = tempPos
+
+    try {
+      await Promise.all([
+        categoryService.updatePosition(current.id, current.position),
+        categoryService.updatePosition(below.id, below.position)
+      ])
+      fetchCategories()
+    } catch (error) {
+      console.error(error)
+      toast.error("ไม่สามารถเปลี่ยนลำดับได้")
     }
   }
 
@@ -134,7 +183,8 @@ export default function CategoryAdminPage() {
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50">
-              <TableHead className="w-20">ลำดับ</TableHead>
+              <TableHead className="w-20">ลำดับที่</TableHead>
+              <TableHead className="w-20">จัดลำดับ</TableHead>
               <TableHead>ชื่อหมวดหมู่</TableHead>
               <TableHead className="text-right">จัดการ</TableHead>
             </TableRow>
@@ -142,20 +192,42 @@ export default function CategoryAdminPage() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={3} className="h-32 text-center">
+                <TableCell colSpan={4} className="h-32 text-center">
                   <Loader2 className="size-8 animate-spin mx-auto text-primary" />
                 </TableCell>
               </TableRow>
             ) : categories.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={3} className="h-32 text-center text-muted-foreground">
+                <TableCell colSpan={4} className="h-32 text-center text-muted-foreground">
                   ไม่พบข้อมูลหมวดหมู่
                 </TableCell>
               </TableRow>
             ) : (
               categories.map((category, index) => (
                 <TableRow key={category.id}>
-                  <TableCell className="text-muted-foreground">{index + 1}</TableCell>
+                  <TableCell className="text-muted-foreground font-mono">{index + 1}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1">
+                      <Button 
+                        size="icon" 
+                        variant="ghost" 
+                        className="size-8 h-8 w-8 p-0"
+                        onClick={() => handleMoveUp(index)}
+                        disabled={index === 0}
+                      >
+                        <ArrowUp className="size-4" />
+                      </Button>
+                      <Button 
+                        size="icon" 
+                        variant="ghost" 
+                        className="size-8 h-8 w-8 p-0"
+                        onClick={() => handleMoveDown(index)}
+                        disabled={index === categories.length - 1}
+                      >
+                        <ArrowDown className="size-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
                   <TableCell>
                     {editingId === category.id ? (
                       <div className="flex items-center gap-2">

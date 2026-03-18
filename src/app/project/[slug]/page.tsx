@@ -5,16 +5,17 @@ import { Project } from "@/utils/portfolioService";
 import { Metadata } from "next";
 
 type Props = {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { id } = await params;
+  const { slug } = await params;
+  const decodedSlug = decodeURIComponent(slug);
   
   const { data: project } = await supabase
     .from('projects')
     .select('title, description')
-    .eq('id', id)
+    .eq('slug', decodedSlug)
     .single();
 
   if (!project) return { title: 'ไม่พบเนื้อหา' };
@@ -25,14 +26,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function Page({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const decodedSlug = decodeURIComponent(slug);
   
   // Fetch project from Supabase
   const { data: project, error } = await supabase
     .from('projects')
     .select('*')
-    .eq('id', id)
+    .eq('slug', decodedSlug)
     .single();
 
   if (error || !project) {
@@ -44,12 +46,12 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
     .from('projects')
     .select('*')
     .eq('category', project.category)
-    .neq('id', id)
+    .neq('id', project.id)
     .limit(3);
 
   return (
     <ProjectDetailClient 
-      id={id} 
+      id={project.id} 
       initialProject={project as Project} 
       relatedProjects={(relatedProjects || []) as Project[]} 
     />

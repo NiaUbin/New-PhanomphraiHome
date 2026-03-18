@@ -2,6 +2,7 @@ import { supabase } from './supabase'
 
 export interface Project {
   id?: string
+  slug?: string
   title: string
   description: string
   category: string
@@ -82,24 +83,37 @@ export const portfolioService = {
 export interface Category {
   id: string
   name: string
+  position: number
   created_at?: string
 }
 
 export const categoryService = {
   async getAll() {
+    // Try ordering by position first
     const { data, error } = await supabase
       .from('categories')
       .select('*')
-      .order('created_at', { ascending: true })
+      .order('position', { ascending: true })
     
-    if (error) throw error
-    return data as Category[]
+    // If error (e.g. position column doesn't exist yet), fallback to created_at
+    if (error) {
+      console.warn("Category sorting by position failed, falling back to created_at:", error.message)
+      const { data: fallbackData, error: fallbackError } = await supabase
+        .from('categories')
+        .select('*')
+        .order('created_at', { ascending: true })
+      
+      if (fallbackError) throw fallbackError
+      return (fallbackData || []) as Category[]
+    }
+    
+    return (data || []) as Category[]
   },
 
-  async create(name: string) {
+  async create(name: string, position: number = 0) {
     const { data, error } = await supabase
       .from('categories')
-      .insert([{ name }])
+      .insert([{ name, position }])
       .select()
     
     if (error) throw error
@@ -115,6 +129,15 @@ export const categoryService = {
     
     if (error) throw error
     return data[0] as Category
+  },
+
+  async updatePosition(id: string, position: number) {
+    const { error } = await supabase
+      .from('categories')
+      .update({ position })
+      .eq('id', id)
+    
+    if (error) throw error
   },
 
   async delete(id: string) {
