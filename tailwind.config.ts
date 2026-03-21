@@ -15,9 +15,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ['"Cormorant Garamond"', '"Kanit"', 'serif'],
-        body: ['"DM Sans"', '"Prompt"', 'sans-serif'],
-        sans: ['"DM Sans"', '"Prompt"', 'sans-serif'],
+        display: ['"Anuphan"', '"Cormorant Garamond"', '"Kanit"', 'serif'],
+        body: ['"Anuphan"', '"DM Sans"', '"Prompt"', 'sans-serif'],
+        sans: ['"Anuphan"', '"DM Sans"', '"Prompt"', 'sans-serif'],
         mono: ['"Space Mono"', '"Prompt"', 'monospace'],
       },
       colors: {
