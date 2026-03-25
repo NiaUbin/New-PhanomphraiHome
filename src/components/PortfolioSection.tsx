@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { MapPin } from 'lucide-react';
 import ScrollReveal from './ScrollReveal';
 
+
 interface SupabaseProject {
   id: string | number;
   slug?: string;
@@ -103,40 +104,40 @@ const PortfolioSection = ({
                 <ScrollReveal key={project.id + active} delay={i * 100}>
                   <Link
                     href={`/project/${project.slug || project.id}`}
-                    className={`group relative overflow-hidden break-inside-avoid block ${
-                      i % 3 === 0 ? 'aspect-[3/4]' : i % 3 === 1 ? 'aspect-[4/3]' : 'aspect-square'
-                    }`}
+                    className="group relative overflow-hidden block break-inside-avoid"
                   >
+                    {/* Image */}
                     <img
                       src={project.image_url || project.img || '/placeholder.svg'}
                       alt={project.title}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                     />
-                    {/* Subtle permanent category label */}
-                    <div className="absolute bottom-4 left-4 z-10 opacity-100 group-hover:opacity-0 transition-opacity duration-300">
-                      <div className="bg-black/40 backdrop-blur-md px-3 py-1 rounded-sm border border-white/10">
-                        <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-white font-bold">
-                          {project.category || project.tag || 'Project'}
-                        </span>
-                      </div>
+
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-70 group-hover:opacity-90 transition-all duration-500" />
+
+                    {/* Top Tag */}
+                    <div className="absolute top-4 left-4 z-10">
+                      <span className="px-3 py-1 text-[10px] tracking-widest uppercase font-semibold bg-black/40 backdrop-blur-md border border-white/10 text-white rounded-full">
+                        {project.category || project.tag || 'Project'}
+                      </span>
                     </div>
 
-                    {/* Full Hover Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-8">
-                      <div className="translate-y-4 group-hover:translate-y-0 transition-all duration-500 w-full">
-                        <div className="flex items-center gap-2 mb-3">
-                          <span className="w-6 h-px bg-primary" />
-                          <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary font-bold">
-                            {project.category || project.tag || 'Architectural Design'}
-                          </span>
-                        </div>
-                        <h3 className="font-display text-3xl font-bold text-white mb-2 leading-tight drop-shadow-lg">
+                    {/* Content */}
+                    <div className="absolute bottom-0 p-6 w-full z-10">
+                      <div className="translate-y-6 group-hover:translate-y-0 transition-all duration-500">
+                        
+                        <h3 className="text-2xl md:text-3xl font-bold text-white mb-2 leading-tight">
                           {project.title}
                         </h3>
-                        <div className="flex items-center gap-2 text-white/70 font-body text-xs mb-6 px-1">
+
+                        <div className="flex items-center gap-2 text-white/70 text-xs">
                           <MapPin className="w-3 h-3 text-primary" />
                           {project.location || 'กรุงเทพมหานคร'}
                         </div>
+
+                        {/* underline animation */}
+                        <div className="mt-4 h-px w-0 bg-primary group-hover:w-full transition-all duration-500" />
                       </div>
                     </div>
                   </Link>
@@ -144,18 +145,24 @@ const PortfolioSection = ({
               ))}
             </div>
 
-            <ScrollReveal delay={300}>
-              <div className="flex justify-center mt-16 md:mt-20">
-                <Link
-                  href="/portfolio"
-                  className="group relative inline-flex items-center gap-3 font-mono text-xs md:text-sm uppercase tracking-[0.2em] px-10 py-4 border border-primary text-primary hover:text-white transition-all duration-500 overflow-hidden"
-                >
-                  <span className="relative z-10 font-bold">ดูผลงานทั้งหมด</span>
-                  <span className="relative z-10 transition-transform duration-300 group-hover:translate-x-1">→</span>
-                  <span className="absolute inset-0 bg-primary translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
-                </Link>
-              </div>
-            </ScrollReveal>
+        <ScrollReveal delay={400}>
+          <div className="flex flex-col items-center mt-16 md:mt-24">
+            <Link
+              href="/portfolio"
+              className="group relative inline-flex items-center gap-3 mt-20"
+            >
+              <span className="text-sm uppercase tracking-[0.4em] font-semibold text-foreground group-hover:text-primary transition">
+                ดูผลงานทั้งหมด
+              </span>
+
+              <span className="transition-transform duration-300 group-hover:translate-x-2 text-lg">
+                →
+              </span>
+
+              <span className="absolute -bottom-2 left-0 w-0 h-px bg-primary transition-all duration-500 group-hover:w-full" />
+            </Link>
+          </div>
+        </ScrollReveal>
           </>
           
         ) : (

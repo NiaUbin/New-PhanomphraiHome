@@ -196,7 +196,7 @@ const ProjectHero = ({
                 initial={{ opacity: 0, y: 28 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.45, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                className="font-display text-4xl md:text-6xl lg:text-[5.5rem] font-bold text-white leading-[1.03] tracking-tight mb-8"
+                className="font-display text-4xl md:text-5xl lg:text-[3.5rem] font-bold text-white leading-[1.03] tracking-tight mb-8"
               >
                 {project.title}
               </motion.h1>
@@ -297,17 +297,14 @@ const ProjectStatsBar = ({ project }: { project: UnifiedProject }) => {
 
   if (active.length === 0 && !hasPrice) return null;
 
-  // แยก numeric / unit จาก string — ถ้า field มี unit กำหนดไว้ก็ใช้ของ config แทน
+  // แยก numeric / unit จาก string
   const resolveValue = (raw: string, configUnit: string) => {
     const m = raw.match(/^([\d,.]+)\s*(.*)/);
     if (m) {
       const num = m[1];
-      // ถ้า config กำหนด unit ไว้ → ใช้ config (เช่น "ห้อง")
-      // ถ้าไม่ได้กำหนด → ใช้ unit ที่ parse จาก string (เช่น "ตร.ม.")
       const unit = configUnit || m[2] || "";
       return { num, unit, isText: false };
     }
-    // text-only (เช่น "นครราชสีมา", "2569")
     return { num: raw, unit: "", isText: true };
   };
 
@@ -319,49 +316,41 @@ const ProjectStatsBar = ({ project }: { project: UnifiedProject }) => {
 
   return (
     <section className="bg-background border-t border-border/30">
-      {/* Label strip */}
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
-        <div className="flex items-center justify-between py-5">
-          <SectionLabel>รายละเอียดโครงการ</SectionLabel>
-          <span className="font-mono text-[10px] text-muted-foreground/40 uppercase tracking-[0.3em]">
-            {project.title}
-          </span>
-        </div>
-        <Hairline />
-      </div>
 
-      {/* Stats grid */}
-      {active.length > 0 && (
-        <div className="max-w-7xl mx-auto px-6 lg:px-10">
+        {/* ── Centered label ── */}
+        <div className="flex items-center gap-5 py-6">
+          <div className="flex-1 h-px bg-border/50" />
+          <span className="font-mono text-xs uppercase tracking-[0.3em] text-foreground/80">
+            รายละเอียดโครงการ
+          </span>
+          <div className="flex-1 h-px bg-border/50" />
+        </div>
+
+        {/* ── Stats grid ── */}
+        {active.length > 0 && (
           <div
-            className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-${Math.min(active.length, 6)} divide-x divide-border/25`}
+            className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-${Math.min(active.length, 6)} divide-x divide-border/15`}
           >
             {active.map((item, idx) => {
               const { num, unit, isText } = resolveValue(String(item.value), item.unit);
               return (
                 <ScrollReveal key={item.label} delay={idx * 50}>
-                  <div className="group flex flex-col gap-2.5 py-7 px-5 lg:px-6 hover:bg-primary/10 transition-colors duration-300">
-                    {/* Icon + label */}
-                    <div className="flex items-center gap-1.5 text-muted-foreground/45 group-hover:text-primary transition-colors duration-300">
-                      <item.Icon className="w-3.5 h-3.5 shrink-0" strokeWidth={1.5} />
-                      <span className="font-mono text-[10px] uppercase tracking-[0.28em] truncate">
-                        {item.label}
-                      </span>
-                    </div>
-
-                    {/* Value */}
-                    <div className="flex items-baseline gap-1 min-w-0">
+                  <div className="group flex flex-col gap-1.5 py-5 px-4 lg:px-6 transition-colors duration-300">
+                    <span className="text-[15px] font-semibold uppercase tracking-[0.15em] text-primary transition-colors">
+                      {item.label}
+                    </span>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <item.Icon className="w-5 h-5 shrink-0 text-primary transition-colors duration-300" strokeWidth={1.9} />
                       <span
-                        className={`font-display leading-none ${
-                          isText
-                            ? "text-lg lg:text-xl"     // text-only: เล็กลง ไม่ล้นขอบ
-                            : "text-2xl lg:text-3xl"   // ตัวเลข: ปรับจาก 3xl/4xl → 2xl/3xl
-                        } text-primary`}
+                        className={`font-display font-bold leading-none ${
+                          isText ? "text-lg lg:text-xl" : "text-xl lg:text-xl"
+                        } text-foreground/80`}
                       >
                         {num}
                       </span>
                       {unit && (
-                        <span className="font-body text-xs text-muted-foreground shrink-0">
+                        <span className="font-body mt-1 text-sm text-foreground/80 shrink-0">
                           {unit}
                         </span>
                       )}
@@ -371,35 +360,38 @@ const ProjectStatsBar = ({ project }: { project: UnifiedProject }) => {
               );
             })}
           </div>
-          <Hairline />
-        </div>
-      )}
+        )}
 
-      {/* Price row */}
-      {hasPrice && (() => {
-        const { num, unit } = formatPrice(price);
-        return (
-          <div className="max-w-7xl mx-auto px-6 lg:px-10">
-            <ScrollReveal>
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 py-8">
-                <div>
-                  <SectionLabel>ราคาโครงการ</SectionLabel>
-                  <p className="font-display text-lg font-bold text-foreground">{project.title}</p>
-                </div>
-                <div className="flex items-baseline gap-2.5">
-                  <span
-                    className="font-display text-4xl md:text-5xl tracking-tighter text-primary"
-                  >
-                    {num}
-                  </span>
-                  <span className="font-body text-sm text-muted-foreground">{unit}</span>
-                </div>
-              </div>
-            </ScrollReveal>
-            <Hairline />
-          </div>
-        );
-      })()}
+        {/* ── Price ── */}
+        {hasPrice && (() => {
+          const { num, unit } = formatPrice(price);
+          return (
+            <>
+              <Hairline />
+                <ScrollReveal>
+                  <div className="flex flex-col items-center justify-center py-6 text-center">
+                    
+                    <span className="text-[15px] font-medium uppercase tracking-[0.2em] text-foreground/60 mb-2">
+                      งบประมาณ
+                    </span>
+
+                    <div className="flex items-end justify-center gap-1">
+                      <span className="font-display text-2xl md:text-3xl font-semibold tracking-tight text-primary">
+                        {num}
+                      </span>
+                      <span className="text-[11px] text-foreground/40 mb-[2px]">
+                        {unit}
+                      </span>
+                    </div>
+
+                  </div>
+                </ScrollReveal>
+            </>
+          );
+        })()}
+
+        <Hairline />
+      </div>
     </section>
   );
 };
@@ -796,4 +788,4 @@ const ProjectNotFound = () => (
   </div>
 );
 
-export default ProjectDetailClient;
+export default ProjectDetailClient;   

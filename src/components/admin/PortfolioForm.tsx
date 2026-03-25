@@ -47,9 +47,10 @@ const formSchema = z.object({
 interface PortfolioFormProps {
   initialData?: Project
   onSuccess: () => void
+  onCancel?: () => void
 }
 
-export function PortfolioForm({ initialData, onSuccess }: PortfolioFormProps) {
+export function PortfolioForm({ initialData, onSuccess, onCancel }: PortfolioFormProps) {
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [categories, setCategories] = useState<Category[]>([])
@@ -196,393 +197,436 @@ export function PortfolioForm({ initialData, onSuccess }: PortfolioFormProps) {
     form.setValue("highlights", current.filter((_, i) => i !== index))
   }
 
+  // Shared input class for consistency
+  const inputClass = "bg-white border border-border/40 rounded-lg shadow-sm focus-visible:ring-2 focus-visible:ring-primary/30 focus:border-primary/50 focus:bg-white transition-all h-10"
+  const textareaClass = "bg-white border border-border/40 rounded-lg shadow-sm focus-visible:ring-2 focus-visible:ring-primary/30 focus:border-primary/50 focus:bg-white transition-all resize-none"
+  const sectionCardClass = "bg-white rounded-2xl border border-border/30 shadow-sm overflow-hidden"
+  const sectionHeaderClass = "flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-primary/5 to-transparent border-b border-border/20"
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="image_url"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>รูปภาพหน้าปก</FormLabel>
-              <FormControl>
-                <div className="space-y-4">
-                  {field.value ? (
-                    <div className="relative aspect-video w-full rounded-lg overflow-hidden border">
-                      <Image 
-                        src={field.value} 
-                        alt="Preview" 
-                        fill 
-                        className="object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => field.onChange("")}
-                        className="absolute top-2 right-2 p-1 bg-background/80 rounded-full hover:bg-background"
-                      >
-                        <X className="size-4" />
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-10 bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer relative">
-                      <Upload className="size-10 text-muted-foreground mb-2" />
-                      <p className="text-sm text-muted-foreground">คลิกเพื่ออัปโหลดรูปภาพ</p>
-                      <input
-                        type="file"
-                        className="absolute inset-0 opacity-0 cursor-pointer"
-                        onChange={handleFileUpload}
-                        accept="image/*"
-                      />
-                    </div>
-                  )}
-                  {uploading && (
-                    <div className="flex items-center gap-2 text-sm text-primary animate-pulse">
-                      <Loader2 className="size-4 animate-spin" />
-                      กำลังอัปโหลด...
-                    </div>
-                  )}
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+
+        {/* ═══════════════════════════════════════════════════════ */}
+        {/*  MAIN 2-COLUMN LAYOUT                                  */}
+        {/* ═══════════════════════════════════════════════════════ */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+          {/* ─── LEFT COLUMN: Cover Image (sticky) ─── */}
+          <div className="lg:col-span-4">
+            <div className={`${sectionCardClass} lg:sticky lg:top-6`}>
+              <div className={sectionHeaderClass}>
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10">
+                  <ImageIcon className="size-4 text-primary" />
                 </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* ข้อมูลพื้นฐาน */}
-        <div className="bg-muted/30 p-6 rounded-xl border border-border/50 space-y-6">
-          <div className="flex items-center gap-2 text-primary border-b border-primary/20 pb-2 mb-4">
-            <Info className="size-4" />
-            <h3 className="font-display font-bold uppercase tracking-wider text-sm">ข้อมูลพื้นฐาน</h3>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center gap-2">
-                    <Home className="size-3.5 text-muted-foreground" />
-                    ชื่อโครงการ
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder="เช่น บ้านเดี่ยว วงศ์สว่าง" className="bg-background" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="category"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center gap-2">
-                    <Sparkles className="size-3.5 text-muted-foreground" />
-                    หมวดหมู่โครงการ
-                  </FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger className="bg-background">
-                        <SelectValue placeholder="เลือกหมวดหมู่" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {categories.map((cat) => (
-                        <SelectItem key={cat.id} value={cat.name}>
-                          {cat.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 gap-6">
-            <FormField
-              control={form.control}
-              name="slug"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center gap-2">
-                    <Sparkles className="size-3.5 text-muted-foreground" />
-                    Slug ID ผลงาน (ภาษาอังกฤษ หรือ ภาษาไทย ก็ได้ สำหรับ URL โครงการ)
-                  </FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="เช่นบ้านสองชั้นริมหาด หรือ baan-song-chan" 
-                      className="bg-background" 
-                      {...field} 
-                      onChange={(e) => {
-                        field.onChange(e)
-                        setIsSlugEdited(true)
-                      }}
-                    />
-                  </FormControl>
-                  <p className="text-[10px] text-muted-foreground">
-                    * ใช้สำหรับลิงก์หน้าผลงาน เช่น: phanomphrai.com/project/<strong>{field.value || "slug-name"}</strong>
-                  </p>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="flex items-center gap-2">
-                  <ImageIcon className="size-3.5 text-muted-foreground" />
-                  คำอธิบายผลงาน
-                </FormLabel>
-                <FormControl>
-                  <Textarea 
-                    placeholder="รายละเอียดโครงการที่ต้องการแสดง..." 
-                    className="min-h-[100px] bg-background resize-none" 
-                    {...field} 
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        {/* ข้อมูลรายละเอียดโครงการ */}
-        <div className="bg-muted/30 p-6 rounded-xl border border-border/50 space-y-6">
-          <div className="flex items-center gap-2 text-primary border-b border-primary/20 pb-2 mb-4">
-            <Ruler className="size-4" />
-            <h3 className="font-display font-bold uppercase tracking-wider text-sm">รายละเอียดโครงการ</h3>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-             <FormField
-              control={form.control}
-              name="location"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center gap-2 text-xs">
-                    <MapPin className="size-3.5 text-muted-foreground" />
-                    สถานที่
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder="เช่น กรุงเทพฯ" className="bg-background" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="area"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center gap-2 text-xs">
-                    <Ruler className="size-3.5 text-muted-foreground" />
-                    พื้นที่ใช้สอย
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder="เช่น 320 ตร.ม." className="bg-background" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="price"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center gap-2 text-xs">
-                    <DollarSign className="size-3.5 text-muted-foreground" />
-                    งบประมาณ / ราคา
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder="เช่น 5.5 ล้านบาท" className="bg-background" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 pt-2 border-t border-border/30">
-            <FormField
-              control={form.control}
-              name="year"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-muted-foreground">
-                    <Calendar className="size-3.5" />
-                    ปีที่เสร็จ
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder="2024" className="bg-background" {...field} />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="duration"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-muted-foreground">
-                    <Clock className="size-3.5" />
-                    ระยะเวลา
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder="8 เดือน" className="bg-background" {...field} />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="bedroom"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-muted-foreground">
-                    <Bed className="size-3.5" />
-                    ห้องนอน
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder="4" className="bg-background" {...field} />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="bathroom"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-muted-foreground">
-                    <Bath className="size-3.5" />
-                    ห้องน้ำ
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder="3" className="bg-background" {...field} />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-          </div>
-        </div>
-
-        <FormField
-          control={form.control}
-          name="highlights"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>จุดเด่นโครงการ (ทีละข้อ)</FormLabel>
-              <div className="space-y-4">
-                <div className="flex gap-2">
-                  <Input 
-                    placeholder="เช่น ระบบ Smart Home, สระว่ายน้ำส่วนตัว..." 
-                    value={highlightInput}
-                    onChange={(e) => setHighlightInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault()
-                        addHighlight()
-                      }
-                    }}
-                  />
-                  <Button type="button" onClick={addHighlight} variant="outline" className="shrink-0">
-                    <Plus className="size-4 mr-2" />
-                    เพิ่มข้อความ
-                  </Button>
-                </div>
-                
-                <div className="space-y-2">
-                  {field.value?.map((item, index) => (
-                    <div key={index} className="flex items-center gap-3 bg-muted/50 p-3 rounded-lg border group animate-in slide-in-from-left-2 duration-200">
-                      <span className="flex-shrink-0 w-6 h-6 bg-primary/20 text-primary text-[10px] font-bold rounded-full flex items-center justify-center">
-                        {index + 1}
-                      </span>
-                      <span className="flex-1 text-sm">{item}</span>
-                      <button
-                        type="button"
-                        onClick={() => removeHighlight(index)}
-                        className="p-1 hover:bg-destructive/10 text-muted-foreground hover:text-destructive rounded-md transition-colors"
-                      >
-                        <X className="size-4" />
-                      </button>
-                    </div>
-                  ))}
-                  {(!field.value || field.value.length === 0) && (
-                    <p className="text-xs text-muted-foreground italic text-center py-2">ยังไม่มีการระบุจุดเด่นโครงการ</p>
+                <h3 className="font-display font-bold text-sm tracking-wide">รูปภาพหน้าปก</h3>
+              </div>
+              <div className="p-5">
+                <FormField
+                  control={form.control}
+                  name="image_url"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <div className="space-y-3">
+                          {field.value ? (
+                            <div className="relative aspect-[4/3] w-full rounded-xl overflow-hidden border border-border/20 shadow-md group">
+                              <Image
+                                src={field.value}
+                                alt="Preview"
+                                fill
+                                className="object-cover transition-transform group-hover:scale-[1.03] duration-500"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                              <button
+                                type="button"
+                                onClick={() => field.onChange("")}
+                                className="absolute top-3 right-3 p-2 bg-black/40 text-white rounded-full hover:bg-black/60 backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100"
+                              >
+                                <X className="size-4" />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="relative flex flex-col items-center justify-center border-2 border-dashed border-border/40 rounded-xl py-12 px-6 bg-muted/20 hover:bg-muted/30 hover:border-primary/30 transition-all cursor-pointer group min-h-[260px]">
+                              <div className="bg-primary/8 p-4 rounded-2xl mb-4 group-hover:scale-110 group-hover:bg-primary/12 transition-all">
+                                <Upload className="size-7 text-primary/70" />
+                              </div>
+                              <p className="text-sm font-medium text-foreground/70 mb-1">คลิกเพื่ออัปโหลดรูปภาพ</p>
+                              <p className="text-[11px] text-muted-foreground">PNG, JPG หรือ WEBP (สูงสุด 5MB)</p>
+                              <input
+                                type="file"
+                                className="absolute inset-0 opacity-0 cursor-pointer"
+                                onChange={handleFileUpload}
+                                accept="image/*"
+                              />
+                            </div>
+                          )}
+                          {uploading && (
+                            <div className="flex justify-center items-center gap-2 text-sm text-primary animate-pulse py-3 bg-primary/5 rounded-lg">
+                              <Loader2 className="size-4 animate-spin" />
+                              กำลังอัปโหลด...
+                            </div>
+                          )}
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* ─── RIGHT COLUMN: All Form Sections ─── */}
+          <div className="lg:col-span-8 space-y-6">
+
+            {/* ──────────── SECTION 1: ข้อมูลพื้นฐาน ──────────── */}
+            <div className={sectionCardClass}>
+              <div className={sectionHeaderClass}>
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10">
+                  <Info className="size-4 text-primary" />
+                </div>
+                <h3 className="font-display font-bold text-sm tracking-wide">ข้อมูลพื้นฐาน</h3>
+              </div>
+              <div className="p-6 space-y-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <FormField
+                    control={form.control}
+                    name="title"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2 text-xs font-semibold text-foreground/80">
+                          <Home className="size-3.5 text-primary/60" />
+                          ชื่อโครงการ
+                        </FormLabel>
+                        <FormControl>
+                          <Input placeholder="เช่น บ้านเดี่ยว วงศ์สว่าง" className={inputClass} {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="category"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2 text-xs font-semibold text-foreground/80">
+                          <Sparkles className="size-3.5 text-primary/60" />
+                          หมวดหมู่โครงการ
+                        </FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className={inputClass}>
+                              <SelectValue placeholder="เลือกหมวดหมู่" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {categories.map((cat) => (
+                              <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="slug"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2 text-xs font-semibold text-foreground/80">
+                        <Sparkles className="size-3.5 text-primary/60" />
+                        Slug ID ผลงาน
+                        <span className="text-[10px] font-normal text-muted-foreground">(สำหรับ URL โครงการ)</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="เช่น baan-song-chan หรือ บ้านสองชั้นริมหาด"
+                          className={inputClass}
+                          {...field}
+                          onChange={(e) => { field.onChange(e); setIsSlugEdited(true) }}
+                        />
+                      </FormControl>
+                      <p className="text-[10px] text-muted-foreground mt-1">
+                        * ลิงก์หน้าผลงาน: phanomphrai.com/project/<strong className="text-primary">{field.value || "slug-name"}</strong>
+                      </p>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2 text-xs font-semibold text-foreground/80">
+                        <ImageIcon className="size-3.5 text-primary/60" />
+                        คำอธิบายผลงาน
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="รายละเอียดโครงการที่ต้องการแสดง..."
+                          className={`min-h-[100px] ${textareaClass}`}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* ──────────── SECTION 2: รายละเอียดโครงการ ──────────── */}
+            <div className={sectionCardClass}>
+              <div className={sectionHeaderClass}>
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10">
+                  <Ruler className="size-4 text-primary" />
+                </div>
+                <h3 className="font-display font-bold text-sm tracking-wide">รายละเอียดโครงการ</h3>
+              </div>
+              <div className="p-5">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="area"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-1.5 text-[11px] font-semibold text-foreground/70">
+                          <Ruler className="size-3 text-primary/50" />
+                          พื้นที่ใช้สอย
+                        </FormLabel>
+                        <FormControl>
+                          <Input placeholder="320 ตร.ม." className={inputClass} {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="bedroom"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-1.5 text-[11px] font-semibold text-foreground/70">
+                          <Bed className="size-3 text-primary/50" />
+                          ห้องนอน
+                        </FormLabel>
+                        <FormControl>
+                          <Input placeholder="3 ห้อง" className={inputClass} {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="bathroom"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-1.5 text-[11px] font-semibold text-foreground/70">
+                          <Bath className="size-3 text-primary/50" />
+                          ห้องน้ำ
+                        </FormLabel>
+                        <FormControl>
+                          <Input placeholder="2 ห้อง" className={inputClass} {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="location"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-1.5 text-[11px] font-semibold text-foreground/70">
+                          <MapPin className="size-3 text-primary/50" />
+                          สถานที่
+                        </FormLabel>
+                        <FormControl>
+                          <Input placeholder="กรุงเทพฯ" className={inputClass} {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="year"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-1.5 text-[11px] font-semibold text-foreground/70">
+                          <Calendar className="size-3 text-primary/50" />
+                          ปีที่เสร็จ
+                        </FormLabel>
+                        <FormControl>
+                          <Input placeholder="2569" className={inputClass} {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="duration"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-1.5 text-[11px] font-semibold text-foreground/70">
+                          <Clock className="size-3 text-primary/50" />
+                          ระยะเวลา
+                        </FormLabel>
+                        <FormControl>
+                          <Input placeholder="6 เดือน" className={inputClass} {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* ราคา/งบประมาณ - แยกแถวออกมาให้ชัดเจน */}
+                <div className="mt-4 pt-4 border-t border-border/15">
+                  <FormField
+                    control={form.control}
+                    name="price"
+                    render={({ field }) => (
+                      <FormItem className="max-w-sm">
+                        <FormLabel className="flex items-center gap-1.5 text-[11px] font-semibold text-foreground/70">
+                          <DollarSign className="size-3 text-primary/50" />
+                          งบประมาณ / ราคา
+                        </FormLabel>
+                        <FormControl>
+                          <Input placeholder="เช่น 5.5 ล้านบาท" className={inputClass} {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </div>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            </div>
 
-        <FormField
-          control={form.control}
-          name="gallery"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>แกลเลอรี่รูปภาพเพิ่มเติม</FormLabel>
-              <FormControl>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {field.value?.map((url, index) => (
-                      <div key={url + index} className="relative aspect-square rounded-lg overflow-hidden border group">
-                        <Image 
-                          src={url} 
-                          alt={`Gallery ${index}`} 
-                          fill 
-                          className="object-cover"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeGalleryImage(index)}
-                          className="absolute top-1 right-1 p-1 bg-destructive/80 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <X className="size-3" />
-                        </button>
-                      </div>
-                    ))}
-                    <div className="relative aspect-square border-2 border-dashed rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors flex flex-col items-center justify-center cursor-pointer">
-                      <Upload className="size-6 text-muted-foreground mb-1" />
-                      <span className="text-[10px] text-muted-foreground">เพิ่มรูป</span>
-                      <input
-                        type="file"
-                        multiple
-                        className="absolute inset-0 opacity-0 cursor-pointer"
-                        onChange={handleGalleryUpload}
-                        accept="image/*"
-                      />
-                    </div>
-                  </div>
+
+            {/* ──────────── SECTION 3: จุดเด่น & แกลเลอรี่ ──────────── */}
+            <div className={sectionCardClass}>
+              <div className={sectionHeaderClass}>
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10">
+                  <Sparkles className="size-4 text-primary" />
                 </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                <h3 className="font-display font-bold text-sm tracking-wide">จุดเด่น & แกลเลอรี่</h3>
+              </div>
+              <div className="p-6 space-y-6">
 
-        <div className="flex justify-end gap-3 pt-4 border-t">
-          <Button type="submit" disabled={loading} className="btn-primary w-full md:w-auto">
-            {loading && <Loader2 className="size-4 animate-spin mr-2" />}
-            {initialData ? "อัปเดตการเปลี่ยนแปลง" : "บันทึกผลงาน"}
-          </Button>
+                {/* Highlights */}
+                <FormField
+                  control={form.control}
+                  name="highlights"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2 text-xs font-semibold text-foreground/80">
+                        จุดเด่นโครงการ (ทีละข้อ)
+                      </FormLabel>
+                      <div className="space-y-3">
+                        <div className="flex gap-2">
+                          <Input
+                            placeholder="เช่น ระบบ Smart Home, สระว่ายน้ำส่วนตัว..."
+                            className={inputClass}
+                            value={highlightInput}
+                            onChange={(e) => setHighlightInput(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addHighlight() } }}
+                          />
+                          <Button type="button" onClick={addHighlight} variant="outline" size="sm" className="shrink-0 h-10 px-4 gap-1.5">
+                            <Plus className="size-4" />
+                            เพิ่ม
+                          </Button>
+                        </div>
+                        <div className="space-y-2">
+                          {field.value?.map((item, index) => (
+                            <div key={index} className="flex items-center gap-3 bg-muted/30 p-3 rounded-lg border border-border/20 group animate-in slide-in-from-left-2 duration-200">
+                              <span className="flex-shrink-0 w-6 h-6 bg-primary/10 text-primary text-[10px] font-bold rounded-full flex items-center justify-center">
+                                {index + 1}
+                              </span>
+                              <span className="flex-1 text-sm">{item}</span>
+                              <button type="button" onClick={() => removeHighlight(index)} className="p-1.5 hover:bg-destructive/10 text-muted-foreground hover:text-destructive rounded-md transition-colors opacity-0 group-hover:opacity-100">
+                                <X className="size-3.5" />
+                              </button>
+                            </div>
+                          ))}
+                          {(!field.value || field.value.length === 0) && (
+                            <div className="text-center py-4 text-xs text-muted-foreground bg-muted/15 rounded-lg border border-dashed border-border/20">
+                              ยังไม่มีการระบุจุดเด่นโครงการ
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="border-t border-border/20" />
+
+                {/* Gallery */}
+                <FormField
+                  control={form.control}
+                  name="gallery"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2 text-xs font-semibold text-foreground/80">
+                        แกลเลอรี่รูปภาพเพิ่มเติม
+                      </FormLabel>
+                      <FormControl>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                          {field.value?.map((url, index) => (
+                            <div key={url + index} className="relative aspect-square rounded-xl overflow-hidden border border-border/20 shadow-sm group">
+                              <Image src={url} alt={`Gallery ${index + 1}`} fill className="object-cover" />
+                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                              <button
+                                type="button"
+                                onClick={() => removeGalleryImage(index)}
+                                className="absolute top-2 right-2 p-1.5 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-destructive"
+                              >
+                                <X className="size-3" />
+                              </button>
+                            </div>
+                          ))}
+                          <div className="relative aspect-square border-2 border-dashed border-border/30 rounded-xl bg-muted/15 hover:bg-muted/25 hover:border-primary/30 transition-all flex flex-col items-center justify-center cursor-pointer group">
+                            <div className="bg-primary/5 p-3 rounded-full mb-2 group-hover:scale-110 group-hover:bg-primary/10 transition-all">
+                              <Upload className="size-5 text-primary/60" />
+                            </div>
+                            <span className="text-[11px] text-muted-foreground font-medium group-hover:text-primary/80 transition-colors">เพิ่มรูปภาพ</span>
+                            <input type="file" multiple className="absolute inset-0 opacity-0 cursor-pointer" onChange={handleGalleryUpload} accept="image/*" />
+                          </div>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+              </div>
+            </div>
+
+          </div>
         </div>
+
+        {/* ═══════════════════════════════════════════════════════ */}
+        {/*  ACTION BAR                                            */}
+        {/* ═══════════════════════════════════════════════════════ */}
+        <div className="flex items-center justify-between gap-4 pt-6 mt-2 border-t border-border/30">
+          <p className="text-xs text-muted-foreground hidden sm:block">
+            กรุณากรอกข้อมูลที่มีเครื่องหมาย * ให้ครบถ้วน
+          </p>
+          <div className="flex gap-3 ml-auto">
+            <Button type="button" variant="outline" onClick={() => onCancel ? onCancel() : window.history.back()} className="px-6 h-10">
+              ยกเลิก
+            </Button>
+            <Button type="submit" disabled={loading} className="btn-primary px-8 h-10">
+              {loading && <Loader2 className="size-4 animate-spin mr-2" />}
+              <span>{initialData ? "อัปเดตข้อมูล" : "สร้างผลงาน"}</span>
+            </Button>
+          </div>
+        </div>
+
       </form>
     </Form>
   )
