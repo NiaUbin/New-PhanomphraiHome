@@ -4,62 +4,65 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState, Suspense } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
+const LETTERS = "PHANOMPHRAI".split("");
+
 function LoaderCore() {
   const [isLoading, setIsLoading] = useState(true);
+  const [progress, setProgress] = useState(0);
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  // 1. ตรวจสอบเมื่อหน้าเว็บและชิ้นส่วนต่างๆ โหลดเสร็จครั้งแรก
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-    const finishLoading = () => {
-      // เผื่อเวลาให้เบราว์เซอร์ Render ภาพแบบสมบูรณ์ชัวร์ๆ
-      timeoutId = setTimeout(() => {
-        setIsLoading(false);
-      }, 600);
-    };
+    if (!isLoading) return;
+    setProgress(0);
+    const t1 = setTimeout(() => setProgress(38), 200);
+    const t2 = setTimeout(() => setProgress(65), 650);
+    const t3 = setTimeout(() => setProgress(85), 1200);
+    return () => [t1, t2, t3].forEach(clearTimeout);
+  }, [isLoading]);
 
+  useEffect(() => {
+    let tid: NodeJS.Timeout;
+    const finish = () => {
+      setProgress(100);
+      tid = setTimeout(() => setIsLoading(false), 700);
+    };
     if (document.readyState === "complete") {
-      finishLoading();
+      finish();
     } else {
-      window.addEventListener("load", finishLoading);
-      return () => window.removeEventListener("load", finishLoading);
+      window.addEventListener("load", finish);
+      return () => window.removeEventListener("load", finish);
     }
-    
-    return () => clearTimeout(timeoutId);
+    return () => clearTimeout(tid);
   }, []);
 
-  // 2. ปิดหน้าโหลดทันทีที่เปลี่ยน Route (Pathname) สำเร็จ
   useEffect(() => {
     if (document.readyState === "complete") {
-      // เมื่อ Next.js เปลี่ยน pathname หมายความว่าหน้าใหม่ถูกโหลดข้อมูลครบแล้ว
-      setIsLoading(false);
+      setProgress(100);
+      const t = setTimeout(() => setIsLoading(false), 450);
+      return () => clearTimeout(t);
     }
   }, [pathname, searchParams]);
 
-  // 3. เริ่มหน้าโหลดทันทีที่ผู้ใช้กดลิงก์ไปหน้าอื่น
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       const target = (e.target as HTMLElement).closest("a");
       if (!target || !target.href || target.hasAttribute("download")) return;
-      
       try {
         const url = new URL(target.href);
         const isInternal = url.origin === window.location.origin;
-        const isSamePage = url.pathname === window.location.pathname && url.search === window.location.search;
-        const isAnchorLink = !!url.hash && url.pathname === window.location.pathname;
-        const hasTargetBlank = target.target === "_blank";
-
-        // ถ้าเป็นลิงก์ภายในเว็บที่ไม่ได้เปิดหน้าต่างใหม่ และไม่ใช่การเลื่อน Anchor หน้าเดิม
-        if (isInternal && !isSamePage && !isAnchorLink && !hasTargetBlank) {
+        const isSamePage =
+          url.pathname === window.location.pathname &&
+          url.search === window.location.search;
+        const isAnchorLink =
+          !!url.hash && url.pathname === window.location.pathname;
+        if (isInternal && !isSamePage && !isAnchorLink && target.target !== "_blank") {
           setIsLoading(true);
         }
       } catch (error) {
-        // Ignore invalid URLs
+        // Silently ignore if URL parsing fails (e.g. mailto:, tel:, or invalid links)
       }
     };
-
-    // ดักจับ Event แบบ Capture Phase เพื่อให้ติดชัวร์ๆ ก่อน React จะระงับ Event
     document.addEventListener("click", handleClick, true);
     return () => document.removeEventListener("click", handleClick, true);
   }, []);
@@ -69,51 +72,188 @@ function LoaderCore() {
       {isLoading && (
         <motion.div
           key="global-loader"
-          // อยู่ชั้นบนสุดเสมอ มี z-index 99999 และบังการกดปุ่ม (pointer-events-auto)
-          className="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-background pointer-events-auto"
+          className="fixed inset-0 z-[99999] pointer-events-auto flex flex-col items-center justify-center gap-9"
+          style={{ backgroundColor: "#F5F0E8" }}
           initial={{ opacity: 1 }}
-          animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.6, ease: "easeInOut" }}
+          transition={{ duration: 0.55, ease: [0.76, 0, 0.24, 1] }}
         >
-          <div className="flex flex-col items-center gap-6">
+          {/* ── Geometric mark ── */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+            style={{
+              position: "relative",
+              width: 96,
+              height: 96,
+              perspective: "360px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            {/* Outer square — rotates on Y */}
             <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.4, ease: "easeOut" }}
-              className="flex flex-col items-center"
-            >
-              <h1 className="text-4xl md:text-5xl font-display font-medium text-primary tracking-[0.2em] mb-4">
-                PHANOMPHRAI
-              </h1>
-              <p className="text-sm font-body text-muted-foreground uppercase tracking-widest text-center">
-                Architecture & Construction
-              </p>
-            </motion.div>
-            
-            {/* เส้นโหลดวิ่งๆ แบบไม่สิ้นสุด (Indeterminate) ทำให้ดูเหมือนว่าระบบกำลังประมวลผลอยู่ตลอด */}
-            <div className="w-48 md:w-64 h-[2px] bg-border overflow-hidden rounded-full mt-4 relative">
-              <motion.div 
-                className="absolute top-0 left-0 h-full bg-primary w-1/2 rounded-full"
-                animate={{ 
-                  left: ["-50%", "150%"],
-                }}
-                transition={{ 
-                  duration: 1.5, 
-                  ease: "easeInOut", 
-                  repeat: Infinity,
-                  repeatDelay: 0.2
-                }}
-              />
+              animate={{ rotateY: 360 }}
+              transition={{ duration: 3.4, repeat: Infinity, ease: "linear" }}
+              style={{
+                position: "absolute",
+                width: 88,
+                height: 88,
+                border: "1.5px solid #92400e",
+                transformStyle: "preserve-3d",
+              }}
+            />
+
+            {/* Cross hairlines — co-rotate with outer square */}
+            <motion.div
+              animate={{ rotateY: 360 }}
+              transition={{ duration: 3.4, repeat: Infinity, ease: "linear" }}
+              style={{
+                position: "absolute",
+                width: 88,
+                height: 1.5,
+                background: "#92400e22",
+                transformStyle: "preserve-3d",
+              }}
+            />
+            <motion.div
+              animate={{ rotateY: 360 }}
+              transition={{ duration: 3.4, repeat: Infinity, ease: "linear" }}
+              style={{
+                position: "absolute",
+                width: 88,
+                height: 1,
+                background: "#92400e18",
+                transformStyle: "preserve-3d",
+                transform: "rotate(90deg)",
+              }}
+            />
+
+            {/* Mid square — rotates on X */}
+            <motion.div
+              animate={{ rotateX: 360 }}
+              transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+              style={{
+                position: "absolute",
+                width: 62,
+                height: 62,
+                border: "1px solid #92400eaa",
+                transformStyle: "preserve-3d",
+              }}
+            />
+
+            {/* Inner square — rotates on Z, reversed */}
+            <motion.div
+              animate={{ rotateZ: -360 }}
+              transition={{ duration: 7, repeat: Infinity, ease: "linear" }}
+              style={{
+                position: "absolute",
+                width: 38,
+                height: 38,
+                border: "0.75px solid #92400e66",
+                transformStyle: "preserve-3d",
+              }}
+            />
+
+            {/* Center dot */}
+            <motion.div
+              animate={{ opacity: [1, 0.4, 1], scale: [1, 0.6, 1] }}
+              transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+              style={{
+                position: "absolute",
+                width: 5,
+                height: 5,
+                borderRadius: "50%",
+                backgroundColor: "#92400e",
+              }}
+            />
+          </motion.div>
+
+          {/* ── Wordmark — letters stagger in ── */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2, delay: 0.3 }}
+            style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 7 }}
+          >
+            <div style={{ display: "flex" }}>
+              {LETTERS.map((char, i) => (
+                <motion.span
+                  key={i}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{
+                    duration: 0.5,
+                    delay: 0.35 + i * 0.055,
+                    ease: [0.22, 1, 0.36, 1],
+                  }}
+                  style={{
+                    fontFamily: "'Playfair Display', Georgia, serif",
+                    fontSize: "1.2rem",
+                    fontWeight: 500,
+                    letterSpacing: "0.22em",
+                    color: "#1C1208",
+                    display: "inline-block",
+                  }}
+                >
+                  {char}
+                </motion.span>
+              ))}
             </div>
-          </div>
+            <motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4, delay: 1.0 }}
+              style={{
+                fontFamily: "DM Sans, sans-serif",
+                fontSize: "0.57rem",
+                letterSpacing: "0.32em",
+                color: "#9C7A52",
+                textTransform: "uppercase" as const,
+              }}
+            >
+              Architecture &amp; Construction
+            </motion.span>
+          </motion.div>
+
+          {/* ── Progress bar ── */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3, delay: 0.5 }}
+            style={{
+              width: 140,
+              height: 1,
+              backgroundColor: "#D6C9B0",
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            <motion.div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                bottom: 0,
+                backgroundColor: "#78583A",
+              }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.45, ease: "easeOut" }}
+            />
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
   );
 }
 
-// ผูกเข้ากับ Suspense เพื่อแก้ปัญหา useSearchParams Bailout Error ตอน Build
 export default function GlobalLoading() {
   return (
     <Suspense fallback={null}>
